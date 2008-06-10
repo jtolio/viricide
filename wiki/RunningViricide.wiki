@@ -14,7 +14,7 @@ You may need some additional modules. It is assumed you have Python 2.5.
 
 To start one-player mode, please navigate to your source checkout directory.
 {{{
-jtolds@giskard:~/projects/viricide$ ./game.py
+jtolds@giskard:~/projects/viricide$ python ./game.py
 }}}
 The default options will start a one-player game. Please see ClientCommandLineHelp for more info on configurable parameters.
 
@@ -22,13 +22,13 @@ The default options will start a one-player game. Please see ClientCommandLineHe
 
 To start multi-player mode, you must have a computer that is accessible by all interested parties over a network (I hope to run a free server in the future that anyone can connect to, but currently my hosting service is down. Sad face. ). Once you have established which computer this is and found out its hostname or IP address, you can start the Viricide Server on it like so:
 {{{
-jtolds@giskard:~/projects/viricide$ ./server.py
+jtolds@giskard:~/projects/viricide$ python ./server.py
 }}}
 The default options should be sufficient. Please see ServerCommandLineHelp for more info on configurable parameters.
 
 Next, you will need to start your clients. First, agree on a game id (some random string), and the number of players playing in this game. Then, connect with each to the server computer like so:
 {{{
-jtolds@giskard:~/projects/viricide$ ./game.py --network_game --host="server_hostname_goes_here" \
+jtolds@giskard:~/projects/viricide$ python ./game.py --network_game --host="server_hostname_goes_here" \
   --game_id="your_random_game_id" --starting_amount_of_players=2
 }}}
 
