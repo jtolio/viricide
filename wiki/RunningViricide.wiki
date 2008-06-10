@@ -1,0 +1,30 @@
+#summary How to get started running the game
+
+= Getting the code =
+
+Right now, there isn't an easy way to download the code without some sort of Subversion client. Please see http://code.google.com/p/viricide/source/checkout for help on getting the code.
+
+You may need some additional modules. It is assumed you have Python 2.5.
+
+= Running one-player =
+
+To start one-player mode, please navigate to your source checkout directory.
+{{{
+jtolds@giskard:~/projects/viricide$ ./game.py
+}}}
+The default options will start a one-player game. Please see ClientCommandLineHelp for more info on configurable parameters.
+
+= Running multi-player =
+
+To start multi-player mode, you must have a computer that is accessible by all interested parties over a network (I hope to run a free server in the future that anyone can connect to, but currently my hosting service is down. :( ). Once you have established which computer this is and found out its hostname or IP address, you can start the Viricide Server on it like so:
+{{{
+jtolds@giskard:~/projects/viricide$ ./server.py
+}}}
+The default options should be sufficient. Please see ServerCommandLineHelp for more info on configurable parameters.
+
+Next, you will need to start your clients. First, agree on a game id (some random string), and the number of players playing in this game. Then, connect with each to the server computer like so:
+{{{
+jtolds@giskard:~/projects/viricide$ ./game.py --network_game --host="hostnamehere" --game_id="your_random_game_id" --starting_amount_of_players=2
+}}}
+
+Once all clients have connected, the game will start.
