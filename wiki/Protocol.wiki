@@ -1,0 +1,53 @@
+#summary The client/server protocol design
+
+= Client/Server protocol =
+
+*This is TOTALLY out of date, but is placed here to give some insight into how the actual protocol might work*
+
+{{{
+TODO(jtolds): update this file to be completely accurate
+
+server: welcome message\n
+server: protocol version\n
+client: short-int size of marshal structure
+client: marshal structure with fields:
+  protocol version
+  game id
+  number of players
+  board size
+  virus number
+  combo length
+server: int-size of marshal structure
+server: marshal structure with fields:
+  success (boolean)
+  error messages (empty if success)
+  number of players currently in game
+  virus placements
+  client's player number
+
+% client loops waiting for messages from server.
+server: short-int size of marshal structure
+server: marshal structure with fields:
+  message type (player_count_update or game start)
+  player_number
+  ip
+...
+
+% once client received game start, both client and server go into game loop
+client sends short-int sized marshal structures with fields:
+  message type (needs pills, send combos, game over, virus number update)
+  combos
+  number of viruses (for game over and virus number update)
+  
+server sends short-int sized marshal structures with fields:
+  message type (new pills, combos, game over, virus number update)
+  pill colors
+  combos
+  won (player number)
+  virus number
+  virus number player number
+
+...
+
+% when server sends game over, closes connections and deletes game info.
+}}}
