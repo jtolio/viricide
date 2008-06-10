@@ -24,7 +24,7 @@ The default options should be sufficient. Please see ServerCommandLineHelp for m
 
 Next, you will need to start your clients. First, agree on a game id (some random string), and the number of players playing in this game. Then, connect with each to the server computer like so:
 {{{
-jtolds@giskard:~/projects/viricide$ ./game.py --network_game --host="host_name_goes_here" \
+jtolds@giskard:~/projects/viricide$ ./game.py --network_game --host="server_hostname_goes_here" \
   --game_id="your_random_game_id" --starting_amount_of_players=2
 }}}
 
