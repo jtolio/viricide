@@ -16,7 +16,7 @@ The default options will start a one-player game. Please see ClientCommandLineHe
 
 = Running multi-player =
 
-To start multi-player mode, you must have a computer that is accessible by all interested parties over a network (I hope to run a free server in the future that anyone can connect to, but currently my hosting service is down. :( ). Once you have established which computer this is and found out its hostname or IP address, you can start the Viricide Server on it like so:
+To start multi-player mode, you must have a computer that is accessible by all interested parties over a network (I hope to run a free server in the future that anyone can connect to, but currently my hosting service is down. Sad face. ). Once you have established which computer this is and found out its hostname or IP address, you can start the Viricide Server on it like so:
 {{{
 jtolds@giskard:~/projects/viricide$ ./server.py
 }}}
