@@ -903,11 +903,12 @@ def main(argv):
   except flags.FlagsError, e:
     print "%s\nUsage: %s [flags]" % (e, sys.argv[0])
     print "Try --help for more information"
-    sys.exit(1)
+    return 1
   SetUpLogging()
   try: server()
   except KeyboardInterrupt, e: pass
   print "Goodbye."
+  return 0
   
 if __name__ == "__main__":
-  main(sys.argv)  
+  sys.exit(main(sys.argv))
