@@ -28,7 +28,7 @@ import gflags as flags
 
 FLAGS = flags.FLAGS
 flags.DEFINE_float("object_receive_time", 1.0, "The time before we give up "
-    "trying to receive a serialzed network 'object' after receiving its size "
+    "trying to receive a serialized network 'object' after receiving its size "
     "information.")
 flags.DEFINE_boolean("output_network_traffic", False, "Whether or not to output"
     " network 'object' traffic being sent or received by a FancySocket.")
