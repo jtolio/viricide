@@ -1,0 +1,45 @@
+#summary command line help for the client
+
+Viricide
+This game is an internet-multiplayer-ready version of a famous virus curing
+falling pieces puzzle game.
+
+flags:
+
+./game.py:
+  --columns:  The amount of columns your tube has
+    (default: '8')
+    (an integer)
+  --combo_length:  The amount of colors you need to get in a row to make any go away. This is hardly ever anything but 4.
+    (default: '4')
+    (an integer)
+  --game_id:  For network games: the game id to connect to. You can make one up, but it must match the one your friends pick.
+    (default: 'test_game_id')
+  --host:  For network games: the server to connect to.
+    (default: 'localhost')
+  --[no]network_game:  If True, play across a network against other people. If False, play against yourself
+    (default: 'false')
+  --port:  For network games: the TCP port over whichto connect to the host
+    (default: '54353')
+    (an integer)
+  --rows:  The amount of rows your tube has
+    (default: '16')
+    (an integer)
+  --speed:  The speed of the game. Smaller is faster
+    (default: '300')
+    (an integer)
+  --starting_amount_of_players:  For network games: the amount of people to wait for before starting the game.
+    (default: '2')
+    (an integer)
+  --virus_number:  The amount of viruses that must be cleared. In a similar and more famous game featuring a cartoon physician, the amount of viruses is chosen as (level + 1) * 4
+    (default: '40')
+    (an integer)
+
+network:
+  -?,--[no]help:  show this help
+  --[no]helpshort:  show usage only for this module
+  --object_receive_time:  The time before we give up trying to receive a serialized network 'object' after receiving its size information.
+    (default: '1.0')
+    (a number)
+  --[no]output_network_traffic:  Whether or not to output network 'object' traffic being sent or received by a FancySocket.
+    (default: 'false')
