@@ -36,7 +36,7 @@ flags.DEFINE_boolean("network_game", False, "If True, play across a network "
     "against other people. If False, play against yourself")
 flags.DEFINE_string("host", "localhost", "For network games: the server to "
     "connect to.")
-flags.DEFINE_integer("port", 54352, "For network games: the TCP port over which"
+flags.DEFINE_integer("port", 54353, "For network games: the TCP port over which"
     "to connect to the host")
 flags.DEFINE_string("game_id", "test_game_id", "For network games: the game id "
     "to connect to. You can make one up, but it must match the one your friends"
