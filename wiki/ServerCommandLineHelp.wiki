@@ -8,14 +8,17 @@ flags:
 ./server.py:
   --[no]daemonize:  Starts the server in daemon mode.
     (default: 'false')
-  --game_start_timeout:  Number of seconds to wait before aborting a game that needs more player. The countdown is reset if any players join the queue or cancel.
+  --game_start_timeout:  Number of seconds to wait before aborting a game that needs more
+      player. The countdown is reset if any players join the queue or cancel.
     (default: '20')
     (an integer)
-  --[no]limit_total_connections:  Whether or not to terminate after a certain amount of clients have connected. The amount is set by the max_connections flag
+  --[no]limit_total_connections:  Whether or not to terminate after a certain amount of 
+      clients have connected. The amount is set by the max_connections flag
     (default: 'false')
   --log_level:  <CRITICAL|ERROR|WARNING|INFO|DEBUG>: The logging level
     (default: 'WARNING')
-  --max_connections:  Maximum connections to accept total. Must have limit_total_connections set to True
+  --max_connections:  Maximum connections to accept total. Must have 
+      limit_total_connections set to True
     (default: '1')
     (an integer)
   --port:  The port for the server to listen on.
@@ -25,9 +28,11 @@ flags:
 network:
   -?,--[no]help:  show this help
   --[no]helpshort:  show usage only for this module
-  --object_receive_time:  The time before we give up trying to receive a serialized network 'object' after receiving its size information.
+  --object_receive_time:  The time before we give up trying to receive a serialized 
+      network 'object' after receiving its size information.
     (default: '1.0')
     (a number)
-  --[no]output_network_traffic:  Whether or not to output network 'object' traffic being sent or received by a FancySocket.
+  --[no]output_network_traffic:  Whether or not to output network 'object' traffic being 
+      sent or received by a FancySocket.
     (default: 'false')
 }}}
