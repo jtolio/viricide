@@ -1,5 +1,5 @@
 #summary command line help for the client
-
+{{{
 Viricide
 This game is an internet-multiplayer-ready version of a famous virus curing
 falling pieces puzzle game.
@@ -43,3 +43,4 @@ network:
     (a number)
   --[no]output_network_traffic:  Whether or not to output network 'object' traffic being sent or received by a FancySocket.
     (default: 'false')
+}}}
