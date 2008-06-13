@@ -32,6 +32,15 @@ KEYDELAY = {MOVE_LEFT: 150,
 KEYSPEED = {MOVE_LEFT: 150,
             MOVE_RIGHT: 150,
             MOVE_DOWN: 80}
+XO_UP, XO_DOWN, XO_LEFT, XO_RIGHT, XO_CIRCLE, XO_SQUARE, XO_CHECK, XO_X = (
+    264, 258, 260, 262, 265, 263, 257, 259)
+LEFT_BUTTONS = [pygame.K_LEFT, XO_LEFT]
+RIGHT_BUTTONS = [pygame.K_RIGHT, XO_RIGHT]
+DOWN_BUTTONS = [pygame.K_DOWN, XO_DOWN]
+EXIT_BUTTONS = [pygame.K_ESCAPE, pygame.K_q]
+PAUSE_BUTTONS = [pygame.K_PAUSE, pygame.K_p, XO_CIRCLE]
+ROTATE_LEFT_BUTTONS = [pygame.K_a, XO_X]
+ROTATE_RIGHT_BUTTONS = [pygame.K_s, XO_CHECK]
 
 class Driver(object):
   """This class drives the game of Viricide. It holds the rules and does most of
@@ -73,22 +82,22 @@ class Driver(object):
           remaining_virus_number=self.tube.VirusesRemaining())
       return
     elif event.type == pygame.KEYDOWN:
-      if event.key in [pygame.K_ESCAPE, pygame.K_q]:
+      if event.key in EXIT_BUTTONS:
         self._comlink.NotifyGameOver(
             remaining_virus_number=self.tube.VirusesRemaining())
         return
-      elif event.key in [pygame.K_p, pygame.K_PAUSE]:
+      elif event.key in PAUSE_BUTTONS:
         self._game_paused = not self._game_paused
       if not self._game_paused:
-        if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
-          move_event = {pygame.K_LEFT:MOVE_LEFT,
-                    pygame.K_RIGHT:MOVE_RIGHT}[event.key]
-          self._MoveSelectedPill(move_event,KEYDELAY[move_event])
-        elif event.key == pygame.K_DOWN:
+        if event.key in LEFT_BUTTONS:
+          self._MoveSelectedPill(MOVE_LEFT,KEYDELAY[MOVE_LEFT])
+        elif event.key in RIGHT_BUTTONS:
+          self._MoveSelectedPill(MOVE_RIGHT,KEYDELAY[MOVE_RIGHT])
+        elif event.key in DOWN_BUTTONS:
           self._MoveSelectedPill(MOVE_DOWN,KEYDELAY[MOVE_DOWN])
-        elif event.key == pygame.K_a:
+        elif event.key in ROTATE_LEFT_BUTTONS:
           self.tube.RotatePill(self._selected_pill,clockwise=False)
-        elif event.key == pygame.K_s:
+        elif event.key in ROTATE_RIGHT_BUTTONS:
           self.tube.RotatePill(self._selected_pill,clockwise=True)
     if not self._game_paused:
       if event.type == TICK:
@@ -96,11 +105,19 @@ class Driver(object):
       elif event.type in [MOVE_LEFT, MOVE_RIGHT, MOVE_DOWN]:
         self._MoveSelectedPill(event.type,KEYSPEED[event.type])
 
+  def _ButtonClassPressed(self, button_list):
+    """True if any button in a button class, or list of buttons, is currently
+    pressed, False otherwise
+    """
+    for button in button_list:
+      if pygame.key.get_pressed()[button]: return True
+    return False
+
   def _MoveSelectedPill(self,direction,timer_delay):
     """direction must be MOVE_LEFT, MOVE_RIGHT, or MOVE_DOWN."""
     if direction in [MOVE_LEFT, MOVE_RIGHT]:
-      if pygame.key.get_pressed()[{MOVE_LEFT:pygame.K_LEFT,
-                                   MOVE_RIGHT:pygame.K_RIGHT}[direction]]:
+      if self._ButtonClassPressed({MOVE_LEFT:LEFT_BUTTONS,
+                                   MOVE_RIGHT:RIGHT_BUTTONS}[direction]):
         pygame.time.set_timer(direction,timer_delay)
         self.tube.MovePill(self._selected_pill,0,
                                       {MOVE_LEFT:-1,MOVE_RIGHT:1}[direction],
@@ -108,9 +125,10 @@ class Driver(object):
       else:
         pygame.time.set_timer(direction,-1)
     elif direction == MOVE_DOWN:
-        if pygame.key.get_pressed()[pygame.K_DOWN]:
+        if self._ButtonClassPressed(DOWN_BUTTONS):
           pygame.time.set_timer(MOVE_DOWN,timer_delay)
-          if not self.tube.MovePill(self._selected_pill,1,0,blocking=False,move_connected=True):
+          if not self.tube.MovePill(self._selected_pill, 1, 0, blocking=False,
+              move_connected=True):
             self._selected_pill = None
         else:
           pygame.time.set_timer(MOVE_DOWN,-1)
@@ -123,7 +141,7 @@ class Driver(object):
     # and it's connected half are the only pills that can possibly be falling
     # due to the rules of the game, so we're okay to try and not implement
     # gravity if that's the case.
-    any_moved = self._selected_pill and pygame.key.get_pressed()[pygame.K_DOWN] \
+    any_moved = self._selected_pill and self._ButtonClassPressed(DOWN_BUTTONS) \
                 or self.tube.MovePill(self._selected_pill,1,0)
     if not any_moved:
       for pill in self.tube.cells(cells.Pill):
