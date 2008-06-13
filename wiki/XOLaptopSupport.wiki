@@ -18,7 +18,7 @@ Then, to start the game, it is as simple as running the following commands:
 [olpc@xo-00-00-00 viricide]$ ./game.py
 }}}
 
-For more instructions on changing the game speed or other settings, please see RunningViricide.
+For more instructions on changing the game speed or other settings, please see ClientCommandLineHelp and RunningViricide.
 
 = How to make Viricide more native to Sugar =
 
