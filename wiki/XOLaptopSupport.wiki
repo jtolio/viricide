@@ -1,0 +1,27 @@
+#summary Viricide Support for the XO Laptop
+
+= XO Laptop support =
+
+If you have an [http://wiki.laptop.org XO Laptop], you probably want some really sweet games to play on it, using the screen keys. Viricide not only runs on XO laptops, but it supports those screen keys. Hooray!
+
+= How to install =
+
+Open a terminal on your XO and type in
+{{{
+[olpc@xo-00-00-00 ~]$ wget http://viricide.googlecode.com/files/viricide-r21.zip
+[olpc@xo-00-00-00 ~]$ unzip -d viricide viricide-r21.zip
+}}}
+
+Then, to start the game, it is as simple as running the following commands:
+{{{
+[olpc@xo-00-00-00 ~]$ cd ~/viricide
+[olpc@xo-00-00-00 viricide]$ ./game.py
+}}}
+
+For more instructions on changing the game speed or other settings, please see RunningViricide.
+
+= How to make Viricide more native to Sugar =
+
+Viricide currently is not a Sugar activity (though that could easily change! [http://jtolds.com/contact/ Contact me] if you want to help!), and furthermore, does not have any sort of graphical menu for changing game options or settings. Until this happens, it doesn't make much sense to run Viricide from anything besides the command line.
+
+If for some reason you are convinced that you will play Viricide with the same settings every time and don't want to have to open the terminal, you can configure the [http://wiki.laptop.org/go/ExecCommand ExecCommand activity] for the XO to simply start Viricide. Please see the [http://wiki.laptop.org/go/ExecCommand ExecCommand page] for more info and tips.
