@@ -78,7 +78,7 @@ class FancySocket(object):
       except socket.timeout, e:
         return None
       except socket.error, e:
-        if e[0] == errno.EAGAIN:
+        if e[0] == errno.EAGAIN or e[0] == errno.EWOULDBLOCK:
           return None
         else:
           raise e
