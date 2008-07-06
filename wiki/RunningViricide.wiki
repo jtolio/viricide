@@ -8,7 +8,7 @@ If you have a Subversion client, you can get the latest code by visiting http://
 
 If you don't have a Subversion client but are still familiar with Python or just commandline applications in general, you can still get a relatively recent code snapshot by visiting http://code.google.com/p/viricide/downloads/list
 
-You may need some additional modules. It is assumed you have Python 2.5.
+It is assumed you have [http://www.python.org/ Python 2.5], but you also need [http://www.pygame.org/ Pygame] and a [http://sourceforge.net/projects/json-py/ JSON library].
 
 = Running one-player =
 
