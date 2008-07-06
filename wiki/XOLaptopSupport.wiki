@@ -8,8 +8,8 @@ If you have an [http://wiki.laptop.org XO Laptop], you probably want some really
 
 Open a terminal on your XO and type in
 {{{
-[olpc@xo-00-00-00 ~]$ wget http://viricide.googlecode.com/files/viricide-r21.zip
-[olpc@xo-00-00-00 ~]$ unzip -d viricide viricide-r21.zip
+[olpc@xo-00-00-00 ~]$ wget http://viricide.googlecode.com/files/viricide-r27.zip
+[olpc@xo-00-00-00 ~]$ unzip -d viricide viricide-r27.zip
 }}}
 
 Then, to start the game, it is as simple as running the following commands:
