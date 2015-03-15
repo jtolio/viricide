@@ -8,9 +8,9 @@ Slight care has been taken to create a reasonably robust engine such that other
 projects can spring from this one. Currently some legacy code exists for the front end
 and slightly newer code exists for the server.
 
-Please see RunningViricide for help on getting started.
+Please see [RunningViricide](https://github.com/jtolds/viricide/wiki/RunningViricide) for help on getting started.
 
-If you have an XO Laptop, please see XOLaptopSupport.
+If you have an XO Laptop, please see [XOLaptopSupport](https://github.com/jtolds/viricide/wiki/XOLaptopSupport).
 
 ## Screenshots 
 
