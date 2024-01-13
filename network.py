@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from __future__ import with_statement
+
 import socket, struct, json, threading, errno
 import gflags as flags
 
@@ -55,7 +55,7 @@ class FancySocket(object):
       pack_string = "!H"
     else:
       pack_string = "!I"
-    if FLAGS.output_network_traffic: print "sending:", obj
+    if FLAGS.output_network_traffic: print("sending:", obj)
     obj = json.write(obj)
     size = len(obj)
     if short_int:
@@ -75,9 +75,9 @@ class FancySocket(object):
           msg_size = struct.unpack("!H", self.recvall(2))[0]
         else:
           msg_size = struct.unpack("!I", self.recvall(4))[0]
-      except socket.timeout, e:
+      except socket.timeout as e:
         return None
-      except socket.error, e:
+      except socket.error as e:
         if e[0] == errno.EAGAIN or e[0] == errno.EWOULDBLOCK:
           return None
         else:
@@ -85,7 +85,7 @@ class FancySocket(object):
       self.sock.settimeout(FLAGS.object_receive_time)
       obj = json.read(self.recvall(msg_size))
       self.sock.settimeout(None)
-    if FLAGS.output_network_traffic: print "receiving:", obj
+    if FLAGS.output_network_traffic: print("receiving:", obj)
     return obj
   
   def sendall(self, *args, **kwargs):
@@ -102,7 +102,7 @@ class FancySocket(object):
         received = self.sock.recv(size - len(data))
         data += received
     if received: return data
-    raise UnexpectedSocketClose, "could not read %d bytes" % size
+    raise UnexpectedSocketClose("could not read %d bytes" % size)
   
   def close(self, *args, **kwargs):
     return self.sock.close(*args, **kwargs)

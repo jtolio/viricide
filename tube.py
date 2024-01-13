@@ -83,7 +83,7 @@ class Tube(object):
     rects = [ Tube.CELLRECT.move((int(self.cols/2)-1) * Tube.CELLRECT.width, 0),
               Tube.CELLRECT.move((int(self.cols/2)) * Tube.CELLRECT.width, 0) ]
     sides = ["left","right"]
-    for i in xrange(2):
+    for i in range(2):
       image = self._GetPicture("pill-"+self._next_pills[i].color+"-solid-"+sides[i])
       self.screen.blit(image,rects[i])
     pygame.display.update(rects)
@@ -104,7 +104,7 @@ class Tube(object):
     """Returns a tuple of row and column, given a cell that has previously
       been added to the tube."""
     if cell not in self._cell_list:
-      raise RuntimeError, "Cell has not yet been added to the tube!"
+      raise RuntimeError("Cell has not yet been added to the tube!")
     return (cell.row,cell.col)
 
   def GetCellAt(self,row,col):
@@ -118,7 +118,7 @@ class Tube(object):
     """Adds a cell to the tube object at initial row and column given if
       possible. Returns False otherwise."""
     if row >= self.rows or row < -1 or col >= self.cols or col < 0:
-      raise RuntimeError, "Row or column out of range!"
+      raise RuntimeError("Row or column out of range!")
     if self._cells[row][col] != None:
       return False
     if isinstance(cell,cells.Pill):
@@ -137,9 +137,9 @@ class Tube(object):
     """Connects the given two half pills to form a whole pill. Should only be
       run when initially adding a whole pill to the tube."""
     if not (isinstance(pill1,cells.Pill) and isinstance(pill2,cells.Pill)):
-      raise RuntimeError, "Arguments are not pills!"
+      raise RuntimeError("Arguments are not pills!")
     if pill1 not in self._cell_list or pill2 not in self._cell_list:
-      raise RuntimeError, "Pill has not yet been added to the tube!"
+      raise RuntimeError("Pill has not yet been added to the tube!")
     pill1.connected,pill2.connected = pill2,pill1
     self._cells_to_redraw += [pill1,pill2]
     self.UpdateScreen()
@@ -155,7 +155,7 @@ class Tube(object):
     if not isinstance(pill,cells.Pill):
       return False
     if pill not in self._cell_list:
-      raise RuntimeError, "Pill has not yet been added to the tube!"
+      raise RuntimeError("Pill has not yet been added to the tube!")
     if not pill.connected:
       return True
     pills = [pill,pill.connected]
@@ -193,16 +193,16 @@ class Tube(object):
     
   def _IsLeftOf(self,pill1,pill2):
     if not (isinstance(pill1,cells.Pill) and isinstance(pill2,cells.Pill)):
-      raise RuntimeError, "Arguments are not pills!"
+      raise RuntimeError("Arguments are not pills!")
     if pill1 not in self._cell_list or pill2 not in self._cell_list:
-      raise RuntimeError, "Pill has not yet been added to the tube!"
+      raise RuntimeError("Pill has not yet been added to the tube!")
     return pill1.row == pill2.row and pill1.col < pill2.col
     
   def _IsAbove(self,pill1,pill2):
     if not (isinstance(pill1,cells.Pill) and isinstance(pill2,cells.Pill)):
-      raise RuntimeError, "Arguments are not pills!"
+      raise RuntimeError("Arguments are not pills!")
     if pill1 not in self._cell_list or pill2 not in self._cell_list:
-      raise RuntimeError, "Pill has not yet been added to the tube!"
+      raise RuntimeError("Pill has not yet been added to the tube!")
     return pill1.col == pill2.col and pill1.row < pill2.row
 
   def MovePill(self,pill,drow,dcol,blocking=True,move_connected=True):
@@ -214,11 +214,11 @@ class Tube(object):
     if not isinstance(pill,cells.Pill):
       return False
     if pill not in self._cell_list:
-      raise RuntimeError, "Pill has not yet been added to the tube!"
+      raise RuntimeError("Pill has not yet been added to the tube!")
     if pill.moved == True:
       return False
     if pill.connected and pill.connected.moved:
-      raise RuntimeError, "Pill not moved, but its counterpart has been!"
+      raise RuntimeError("Pill not moved, but its counterpart has been!")
     if not pill.connected: move_connected = False
     if self._PositionOutOfBounds(pill.row + drow, pill.col + dcol):
       return False
@@ -262,8 +262,8 @@ class Tube(object):
       tube. Importantly, this generator iterates from the bottom of the tube
       to the top."""
     cell_count = 0
-    for r in xrange(self.rows-1,-1,-1):
-      for c in xrange(self.cols):
+    for r in range(self.rows-1,-1,-1):
+      for c in range(self.cols):
         cell = self._cells[r][c]
         if isinstance(cell,filter_class):
           yield cell
@@ -302,7 +302,7 @@ class Tube(object):
     """Wipes all cells out in the -1st row. This can only be pill cells that
       have been rotated there."""
     top_row_cells = []
-    for c in xrange(self.cols):
+    for c in range(self.cols):
       if self._cells[-1][c] != None:
         assert not isinstance(self._cells[-1][c],cells.Virus)
         top_row_cells.append(self._cells[-1][c])
@@ -324,7 +324,7 @@ class Tube(object):
     elif isinstance(cell,cells.Virus):
       return self.images["virus-"+cell.color]
     else: # cell must be a string
-      if self.images.has_key(cell):
+      if cell in self.images:
         return self.images[cell]
       return self.images["background"]
 

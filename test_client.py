@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from __future__ import with_statement
+
 import socket, sys, network, time, random, threading
 
 DEFAULT_ADDRESS = ("localhost", 54353)
@@ -48,7 +48,7 @@ def test_client():
   sock.connect(DEFAULT_ADDRESS)
   try:
     newlines = 0
-    print "receiving: ",
+    print("receiving: ", end=' ')
     while True:
       byte = sock.recvall(1)
       sys.stdout.write(byte)
@@ -57,7 +57,7 @@ def test_client():
         if newlines >= 2:
           break
         else:
-          print "receiving: ",
+          print("receiving: ", end=' ')
     sock.sendObject({
         "protocol_version": PROTOCOL_VERSION,
         "game_id": "testgameid",
@@ -70,11 +70,11 @@ def test_client():
         })
     ret_msg = sock.getObject(short_int = False)
     if not ret_msg["success"]: return
-    print "waiting for game start"
+    print("waiting for game start")
     while True:
       obj = sock.getObject()
       if obj["message_type"] == "game_start": break
-    print "game started"
+    print("game started")
     game_over = []
     x = GameOverThread(sock, game_over)
     x.start()
@@ -85,7 +85,7 @@ def test_client():
         break
       
   finally:
-    print "closing socket, waiting for GameOverThread if applicable"
+    print("closing socket, waiting for GameOverThread if applicable")
     sock.close()
   
 def main(argv):

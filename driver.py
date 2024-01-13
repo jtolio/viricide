@@ -61,8 +61,8 @@ class Driver(object):
     
   def PlaceViruses(self):
     viruses = self._comlink.GetViruses()
-    for r in xrange(self.tube.rows):
-      for c in xrange(self.tube.cols):
+    for r in range(self.tube.rows):
+      for c in range(self.tube.cols):
         if viruses[r][c] != None:
           self.tube.AddCell(cells.Virus(viruses[r][c]),r,c,False)
     self.tube.UpdateScreen()

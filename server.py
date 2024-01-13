@@ -21,8 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from __future__ import with_statement
-import SocketServer, sys, threading, Queue, cells, network, traceback, time
+
+import socketserver, sys, threading, queue, cells, network, traceback, time
 import socket, util, logging, random
 import gflags as flags
 
@@ -101,9 +101,9 @@ class ViricidePlayer(object):
       InvalidPlayerState
     """
     if state == "finished" and self.getGameExit() == "none":
-      raise PlayerGameExitUnset, str(self)
+      raise PlayerGameExitUnset(str(self))
     if state not in ViricidePlayer.VALID_STATES:
-      raise InvalidPlayerState, str(self)
+      raise InvalidPlayerState(str(self))
     self._state = state
   
   def getState(self):
@@ -122,7 +122,7 @@ class ViricidePlayer(object):
       BadGameExitType
     """
     if game_exit not in ViricidePlayer.VALID_GAME_EXITS:
-      raise BadGameExitType, str(self)
+      raise BadGameExitType(str(self))
     self._game_exit = game_exit
   
   def getGameExit(self):
@@ -159,8 +159,8 @@ class ViricidePlayer(object):
     """
     if self.getState() == "disconnected": return
     try: self.sock.sendObject(obj, short_int=short_int)
-    except socket.error, e: self.disconnect()
-    except network.SocketClosed, e: self.disconnect()
+    except socket.error as e: self.disconnect()
+    except network.SocketClosed as e: self.disconnect()
   
   def getObject(self, short_int=True, timeout=None):
     """Gets object obj from this particular player.
@@ -180,12 +180,12 @@ class ViricidePlayer(object):
       network.SocketClosed: when the player is disconnected
     """
     if self.getState() == "disconnected":
-      raise network.SocketClosed, "player %s disconnected" % self
+      raise network.SocketClosed("player %s disconnected" % self)
     try: return self.sock.getObject(short_int=short_int, timeout=timeout)
-    except socket.error, e:
+    except socket.error as e:
       self.disconnect()
-      raise network.UnexpectedSocketClose, str(e)
-    except network.UnexpectedSocketClose, e:
+      raise network.UnexpectedSocketClose(str(e))
+    except network.UnexpectedSocketClose as e:
       self.disconnect()
       raise e
     
@@ -204,7 +204,7 @@ class ViricideGame(object):
     self.starting_amount_of_players = int(starting_amount_of_players)
     self.game_store = game_store
     if self.starting_amount_of_players <= 0:
-      raise WrongNumberOfPlayers, str(self.starting_amount_of_players)
+      raise WrongNumberOfPlayers(str(self.starting_amount_of_players))
 
     self.game_lock = threading.RLock()
     
@@ -274,7 +274,7 @@ class ViricideGame(object):
     """
     with self.game_lock:
       if sock in [x.sock for x in self.all_player_list]:
-        raise SocketAlreadyAdded, str(sock)
+        raise SocketAlreadyAdded(str(sock))
       player = ViricidePlayer(sock, len(self.all_player_list), self)
       logging.debug("adding player %s" % player)
       self.all_player_list.append(player)
@@ -297,10 +297,10 @@ class ViricideGame(object):
       if self.winningPlayer() != None or len(self.activePlayers()) == 0:
         self.endGame()
       return
-    if player.getGameExit() != "none": raise BadGameExitType, str(player)
+    if player.getGameExit() != "none": raise BadGameExitType(str(player))
     with self.game_lock:
       if player not in self.all_player_list:
-        raise PlayerDoesntExist, str(player)
+        raise PlayerDoesntExist(str(player))
       # cases:
       #  1) player is the only player
       #    a) virus_count = 0 is a win
@@ -350,7 +350,7 @@ class ViricideGame(object):
     """Fires the game start event"""
     with self.game_lock:
       if not self.readyToStart():
-        raise NotReadyToStart, str(self)
+        raise NotReadyToStart(str(self))
       logging.debug("starting game %s" % self)
       self.started = True
       self.game_start_event.set()
@@ -394,7 +394,7 @@ class ViricideGame(object):
     logging.debug("disconnecting player %s" % player)
     with self.game_lock:
       if player not in self.all_player_list:
-        raise PlayerDoesntExist, str(player)
+        raise PlayerDoesntExist(str(player))
       if self.winningPlayer() != None or len(self.activePlayers()) <= 1:
         self.endGame()
 
@@ -435,7 +435,7 @@ class ViricideGame(object):
     """
     virus_placement_tuple = (rows, cols, combo_length, virus_number)
     with self.game_lock:
-      if not self.virus_placements.has_key(virus_placement_tuple):
+      if virus_placement_tuple not in self.virus_placements:
         virus_placement = \
             cells.VirusPlacer(*virus_placement_tuple).getViruses()
         self.virus_placements[virus_placement_tuple] = virus_placement
@@ -504,7 +504,7 @@ class ViricideGame(object):
     """
     with self.game_lock:
       if player not in self.all_player_list:
-        raise PlayerDoesntExist, str(player)
+        raise PlayerDoesntExist(str(player))
       self.sendObject({
           "message_type": "virus_number_update",
           "player_number": player.player_number,
@@ -607,8 +607,8 @@ class ViricideGameStore(object):
         closing_function =\
             lambda: self.timeout_thread_class(self, game_id).start()
       elif (game.starting_amount_of_players != starting_amount_of_players):
-        raise WrongNumberOfPlayers, "Number of players is already %d" %\
-            game.starting_amount_of_players
+        raise WrongNumberOfPlayers("Number of players is already %d" %\
+            game.starting_amount_of_players)
       logging.debug("game_store.createGame returning game %s" % game)
     closing_function()
     return game
@@ -621,7 +621,7 @@ class ViricideGameStore(object):
       None if no game associated with game_id exists, the game otherwise
     """
     with self.main_lock:
-      if self.games_dict.has_key(game_id):
+      if game_id in self.games_dict:
         return self.games_dict[game_id]
     return None
   
@@ -633,7 +633,7 @@ class ViricideGameStore(object):
     """
     logging.debug("removing game %s from gamestore" % game_id)
     with self.main_lock:
-      if self.games_dict.has_key(game_id):
+      if game_id in self.games_dict:
         del self.games_dict[game_id]
   
   def endGame(self, game_id):
@@ -643,7 +643,7 @@ class ViricideGameStore(object):
       game_id: string, the game id with which to look up the corresponding game
     """
     try: self.games_dict[game_id].endGame()
-    except KeyError, e:
+    except KeyError as e:
       if e.message != game_id: raise e
   
   def abortGame(self, game_id):
@@ -653,11 +653,11 @@ class ViricideGameStore(object):
       game_id: string, the game id with which to look up the corresponding game
     """
     try: self.games_dict[game_id].abortGame()
-    except KeyError, e:
+    except KeyError as e:
       if e.message != game_id: raise e
 
 
-class ViricideConnectionHandler(SocketServer.BaseRequestHandler):
+class ViricideConnectionHandler(socketserver.BaseRequestHandler):
   """Class that handles incoming connection requests and player management.
   This class is ordinarily instantiated as a new thread.
   """
@@ -675,7 +675,7 @@ class ViricideConnectionHandler(SocketServer.BaseRequestHandler):
       *args, **kwargs: remaining arguments after the socket argument from
           SocketServer.BaseRequestHandler
     """
-    SocketServer.BaseRequestHandler.__init__(self,
+    socketserver.BaseRequestHandler.__init__(self,
         network.FancySocket(plain_socket), *args, **kwargs)
   
   def sendErrors(self):
@@ -726,7 +726,7 @@ class ViricideConnectionHandler(SocketServer.BaseRequestHandler):
     while True:
       if self.game.game_over: return
       try: msg = self.player.getObject()
-      except network.UnexpectedSocketClose, e: return
+      except network.UnexpectedSocketClose as e: return
       if msg is None: continue
       msg_type = msg["message_type"]
       if msg_type == "needs_pills":
@@ -756,7 +756,7 @@ class ViricideConnectionHandler(SocketServer.BaseRequestHandler):
         return self.errors.append("Unknown game creation error.")
       if (self.game.starting_amount_of_players != 
           self.starting_amount_of_players):
-        raise StartingPlayerAmountMismatch, ("%d != %d" %
+        raise StartingPlayerAmountMismatch("%d != %d" %
             (self.game.starting_amount_of_players,
             self.starting_amount_of_players))
       logging.debug("acquiring lock")
@@ -780,9 +780,9 @@ class ViricideConnectionHandler(SocketServer.BaseRequestHandler):
           self.responded = True
         self.game.sendPlayerCountUpdate()
       self.runGame()
-    except WrongNumberOfPlayers, e:
+    except WrongNumberOfPlayers as e:
       self.errors.append("Wrong number of players: %s" % e)
-    except cells.VirusPlacementError, e:
+    except cells.VirusPlacementError as e:
       self.errors.append("Virus placement error: %s" % e)
     finally:
       if self.errors: self.sendErrors()
@@ -805,7 +805,7 @@ class ViricideConnectionHandler(SocketServer.BaseRequestHandler):
         self.errors.append("Must have %d fields." %
             len(ViricideConnectionHandler.REQUIRED_INIT_FIELDS))
       for key in ViricideConnectionHandler.REQUIRED_INIT_FIELDS:
-        if not data.has_key(key):
+        if key not in data:
           self.errors.append("Missing field: %s." % key)
           continue
         if (key in ViricideConnectionHandler.REQUIRED_INIT_INT_FIELDS and
@@ -822,8 +822,8 @@ class ViricideConnectionHandler(SocketServer.BaseRequestHandler):
         self.sendErrors()
       else:
         self.joinGame()
-    except Exception, e:
-      print "Error!:", e
+    except Exception as e:
+      print("Error!:", e)
       traceback.print_exc()
     finally:
       logging.debug("closing up")
@@ -833,7 +833,7 @@ class ViricideConnectionHandler(SocketServer.BaseRequestHandler):
         self.request.close()
 
 
-class ViricideServer(SocketServer.ThreadingTCPServer):
+class ViricideServer(socketserver.ThreadingTCPServer):
   """The main Viricide Server class. This class starts and delegates to all
   others
   """
@@ -870,7 +870,7 @@ class ViricideServer(SocketServer.ThreadingTCPServer):
     self.daemon_threads = not self.limit_total_connections
     self.allow_reuse_address = True
 
-    SocketServer.ThreadingTCPServer.__init__(self, self.address,
+    socketserver.ThreadingTCPServer.__init__(self, self.address,
         ViricideConnectionHandler)
   
   def run(self):
@@ -879,7 +879,7 @@ class ViricideServer(SocketServer.ThreadingTCPServer):
     if self.limit_total_connections:
       logging.debug("viricide server running with a %d request limit" %
           self.max_connections)
-      for i in xrange(self.max_connections):
+      for i in range(self.max_connections):
         self.handle_request()
     else:
       logging.debug("viricide server running with no request limit")
@@ -888,8 +888,8 @@ class ViricideServer(SocketServer.ThreadingTCPServer):
 
 def server(address=None, daemon=None):
   if daemon is None: daemon = FLAGS.daemonize
-  print SERVER_WELCOME
-  print "Starting..."
+  print(SERVER_WELCOME)
+  print("Starting...")
   svr = ViricideServer(address)
   if daemon: util.daemonize()
   svr.run()
@@ -900,14 +900,14 @@ def SetUpLogging():
 def main(argv):
   try:
     argv = FLAGS(argv)
-  except flags.FlagsError, e:
-    print "%s\nUsage: %s [flags]" % (e, sys.argv[0])
-    print "Try --help for more information"
+  except flags.FlagsError as e:
+    print("%s\nUsage: %s [flags]" % (e, sys.argv[0]))
+    print("Try --help for more information")
     return 1
   SetUpLogging()
   try: server()
-  except KeyboardInterrupt, e: pass
-  print "Goodbye."
+  except KeyboardInterrupt as e: pass
+  print("Goodbye.")
   return 0
   
 if __name__ == "__main__":

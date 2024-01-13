@@ -202,12 +202,12 @@ _exported_flags = {}
 
 def __GetModuleName(globals_dict):
   """Given a globals dict, find the module in which it's defined."""
-  for name, module in sys.modules.iteritems():
+  for name, module in sys.modules.items():
     if getattr(module, '__dict__', None) is globals_dict:
       if name == '__main__':
         return sys.argv[0]
       return name
-  raise AssertionError, "No module was found"
+  raise AssertionError("No module was found")
 
 def __GetCallingModule():
   """Get the name of the module that's calling into this module; e.g.,
@@ -217,7 +217,7 @@ def __GetCallingModule():
   for depth in range(1, sys.getrecursionlimit()):
     if not sys._getframe(depth).f_globals is globals():
       return __GetModuleName(sys._getframe(depth).f_globals)
-  raise AssertionError, "No module was found"
+  raise AssertionError("No module was found")
 
 def _GetMainModule():
   """Get the module name from which execution started."""
@@ -226,7 +226,7 @@ def _GetMainModule():
       globals_of_main = sys._getframe(depth).f_globals
     except ValueError:
       return __GetModuleName(globals_of_main)
-  raise AssertionError, "No module was found"
+  raise AssertionError("No module was found")
 
 
 class FlagValues:
@@ -285,21 +285,21 @@ class FlagValues:
     """
     fl = self.FlagDict()
     if not isinstance(flag, Flag):
-      raise IllegalFlagValue, flag
+      raise IllegalFlagValue(flag)
     if not isinstance(name, type("")):
-      raise FlagsError, "Flag name must be a string"
+      raise FlagsError("Flag name must be a string")
     if len(name) == 0:
-      raise FlagsError, "Flag name cannot be empty"
+      raise FlagsError("Flag name cannot be empty")
     # If running under pychecker, duplicate keys are likely to be defined.
     # Disable check for duplicate keys when pycheck'ing.
-    if (fl.has_key(name) and not flag.allow_override and
+    if (name in fl and not flag.allow_override and
         not fl[name].allow_override and not _RUNNING_PYCHECKER):
-      raise DuplicateFlag, name
+      raise DuplicateFlag(name)
     short_name = flag.short_name
     if short_name is not None:
-      if (fl.has_key(short_name) and not flag.allow_override and
+      if (short_name in fl and not flag.allow_override and
           not fl[short_name].allow_override and not _RUNNING_PYCHECKER):
-        raise DuplicateFlag, short_name
+        raise DuplicateFlag(short_name)
       fl[short_name] = flag
     fl[name] = flag
     global _exported_flags
@@ -316,8 +316,8 @@ class FlagValues:
     Retrieve the .value member of a flag object.
     """
     fl = self.FlagDict()
-    if not fl.has_key(name):
-      raise AttributeError, name
+    if name not in fl:
+      raise AttributeError(name)
     return fl[name].value
 
   def __setattr__(self, name, value):
@@ -333,8 +333,8 @@ class FlagValues:
     Delete a previously-defined flag from a flag object.
     """
     fl = self.FlagDict()
-    if not fl.has_key(name):
-      raise AttributeError, name
+    if name not in fl:
+      raise AttributeError(name)
     del fl[name]
 
   def SetDefault(self, name, value):
@@ -342,8 +342,8 @@ class FlagValues:
     Change the default value of the named flag object.
     """
     fl = self.FlagDict()
-    if not fl.has_key(name):
-      raise AttributeError, name
+    if name not in fl:
+      raise AttributeError(name)
     fl[name].SetDefault(value)
 
   def __contains__(self, name):
@@ -355,7 +355,7 @@ class FlagValues:
   has_key = __contains__  # a synonym for __contains__()
 
   def __iter__(self):
-    return self.FlagDict().iterkeys()
+    return iter(self.FlagDict().keys())
 
   def __call__(self, argv):
     """
@@ -386,7 +386,7 @@ class FlagValues:
     # full forms: --mybool=(true|false).
     original_argv = list(argv)
     shortest_matches = None
-    for name, flag in fl.items():
+    for name, flag in list(fl.items()):
       if not flag.boolean:
         continue
       if shortest_matches is None:
@@ -410,7 +410,7 @@ class FlagValues:
     # specified as a string of letters, each letter followed by a colon if it
     # takes an argument.  Long options are stored in an array of strings.
     # Each string ends with an '=' if it takes an argument.
-    for name, flag in fl.items():
+    for name, flag in list(fl.items()):
       longopts.append(name + "=")
       if len(name) == 1: # one-letter option: allow short flag type also
         shortopts += name
@@ -419,8 +419,8 @@ class FlagValues:
 
     try:
       optlist, unparsed_args = getopt.getopt(argv[1:], shortopts, longopts)
-    except getopt.GetoptError, e:
-      raise FlagsError, e
+    except getopt.GetoptError as e:
+      raise FlagsError(e)
     for name, arg in optlist:
       if name.startswith('--'):
         # long option
@@ -430,7 +430,7 @@ class FlagValues:
         # short option
         name = name[1:]
         short_option = 1
-      if fl.has_key(name):
+      if name in fl:
         flag = fl[name]
         if flag.boolean and short_option: arg = 1
         flag.Parse(arg)
@@ -447,14 +447,14 @@ class FlagValues:
     """
     Reset the values to the point before FLAGS(argv) was called.
     """
-    for f in self.FlagDict().values():
+    for f in list(self.FlagDict().values()):
       f.Unparse()
 
   def RegisteredFlags(self):
     """
     Return a list of all registered flags.
     """
-    return self.FlagDict().keys()
+    return list(self.FlagDict().keys())
 
   def FlagValuesDict(self):
     """
@@ -477,7 +477,7 @@ class FlagValues:
     flags_by_module = self.__dict__['__flags_by_module']
     if flags_by_module:
 
-      modules = flags_by_module.keys()
+      modules = list(flags_by_module.keys())
       modules.sort()
 
       # Print the help for the main module first, if possible.
@@ -491,7 +491,7 @@ class FlagValues:
 
     else:
       # Just print one long list of flags.
-      self.__RenderFlagList(self.FlagDict().values(), helplist)
+      self.__RenderFlagList(list(self.FlagDict().values()), helplist)
 
     return '\n'.join(helplist)
 
@@ -524,7 +524,7 @@ class FlagValues:
       if fl.get(name, None) != flag:   # a different flag is using this name now
         continue
       # only print help once
-      if flagset.has_key(flag): continue
+      if flag in flagset: continue
       flagset[flag] = 1
       flaghelp = "  "
       if flag.short_name: flaghelp += "-%s," % flag.short_name
@@ -558,7 +558,7 @@ class FlagValues:
     """
     # Sort the list of flag names
     sorted_flags = []
-    for name, flag in fl.items():
+    for name, flag in list(fl.items()):
       sorted_flags.append(name)
       if flag.boolean:
         sorted_flags.append('no%s' % name)
@@ -642,9 +642,9 @@ class FlagValues:
     flag_line_list = []  # Subset of lines w/o comments, blanks, flagfile= tags.
     try:
       file_obj = open(filename, 'r')
-    except IOError, e_msg:
-      print e_msg
-      print 'ERROR:: Unable to open flagfile: %s' % (filename)
+    except IOError as e_msg:
+      print(e_msg)
+      print('ERROR:: Unable to open flagfile: %s' % (filename))
       return flag_line_list
 
     line_list = file_obj.readlines()
@@ -667,8 +667,8 @@ class FlagValues:
           included_flags = self.__GetFlagFileLines(sub_filename, parsed_file_list)
           flag_line_list.extend(included_flags)
         else: # Case of hitting a circularly included file.
-          print >>sys.stderr, ('Warning: Hit circular flagfile dependency: %s'
-                                                                 % sub_filename)
+          print(('Warning: Hit circular flagfile dependency: %s'
+                                                                 % sub_filename), file=sys.stderr)
       else:
         # Any line that's not a comment or a nested flagfile should
         # get copied into 2nd position, this leaves earlier arguements
@@ -714,7 +714,7 @@ class FlagValues:
         # really is part of this one.
         if current_arg == '--flagfile' or current_arg =='-flagfile':
           if not rest_of_args:
-            raise IllegalFlagValue, '--flagfile with no argument'
+            raise IllegalFlagValue('--flagfile with no argument')
           flag_filename = os.path.expanduser(rest_of_args[0])
           rest_of_args = rest_of_args[1:]
         else:
@@ -736,7 +736,7 @@ class FlagValues:
     a newline.
     """
     s = ''
-    for flag in self.FlagDict().values():
+    for flag in list(self.FlagDict().values()):
       if flag.value is not None:
         s += flag.Serialize() + '\n'
     return s
@@ -813,7 +813,7 @@ class Flag:
     # pass None to a C++ flag.  See swig_flags.Init() for details on
     # this behavior.
     if default is None and allow_override:
-      raise DuplicateFlag, name
+      raise DuplicateFlag(name)
 
     self.Unparse()
 
@@ -834,8 +834,8 @@ class Flag:
   def Parse(self, argument):
     try:
       self.value = self.parser.Parse(argument)
-    except ValueError, e:  # recast ValueError as IllegalFlagValue
-      raise IllegalFlagValue, ("flag --%s: " % self.name) + str(e)
+    except ValueError as e:  # recast ValueError as IllegalFlagValue
+      raise IllegalFlagValue(("flag --%s: " % self.name) + str(e))
     self.present += 1
 
   def Unparse(self):
@@ -855,7 +855,7 @@ class Flag:
         return "--no%s" % self.name
     else:
       if not self.serializer:
-        raise FlagsError, "Serializer not present for flag %s" % self.name
+        raise FlagsError("Serializer not present for flag %s" % self.name)
       return "--%s=%s" % (self.name, self.serializer.Serialize(self.value))
 
   def SetDefault(self, value):
@@ -1028,10 +1028,10 @@ class HelpFlag(BooleanFlag):
     if arg:
       doc = sys.modules["__main__"].__doc__
       flags = str(FLAGS)
-      print doc or ("\nUSAGE: %s [flags]\n" % sys.argv[0])
+      print(doc or ("\nUSAGE: %s [flags]\n" % sys.argv[0]))
       if flags:
-        print "flags:"
-        print flags
+        print("flags:")
+        print(flags)
       sys.exit(1)
 
 class HelpshortFlag(BooleanFlag):
@@ -1049,10 +1049,10 @@ class HelpshortFlag(BooleanFlag):
     if arg:
       doc = sys.modules["__main__"].__doc__
       flags = FLAGS.MainModuleHelp()
-      print doc or ("\nUSAGE: %s [flags]\n" % sys.argv[0])
+      print(doc or ("\nUSAGE: %s [flags]\n" % sys.argv[0]))
       if flags:
-        print "flags:"
-        print flags
+        print("flags:")
+        print(flags)
       sys.exit(1)
 
 
@@ -1097,7 +1097,7 @@ class FloatParser(ArgumentParser):
     val = self.Convert(argument)
     if ((self.lower_bound != None and val < self.lower_bound) or
         (self.upper_bound != None and val > self.upper_bound)):
-      raise ValueError, "%s is not %s" % (val, self.syntactic_help)
+      raise ValueError("%s is not %s" % (val, self.syntactic_help))
     return val
 
 def DEFINE_float(name, default, help, lower_bound=None, upper_bound=None,
@@ -1132,13 +1132,13 @@ class IntegerParser(FloatParser):
         return int(argument, base)
       # ValueError is thrown when argument is a string, and overflows an int.
       except ValueError:
-        return long(argument, base)
+        return int(argument, base)
     else:
       try:
         return int(argument)
       # OverflowError is thrown when argument is numeric, and overflows an int.
       except OverflowError:
-        return long(argument)
+        return int(argument)
 
 def DEFINE_integer(name, default, help, lower_bound=None, upper_bound=None,
                    flag_values = FLAGS, **args):
@@ -1168,7 +1168,7 @@ class EnumParser(ArgumentParser):
     If enum_values is not specified, any string is allowed
     """
     if self.enum_values and argument not in self.enum_values:
-      raise ValueError, ("value should be one of <%s>"
+      raise ValueError("value should be one of <%s>"
                          % "|".join(self.enum_values))
     return argument
 
@@ -1311,7 +1311,7 @@ class MultiFlag(Flag):
 
   def Serialize(self):
     if not self.serializer:
-      raise FlagsError, "Serializer not present for flag %s" % self.name
+      raise FlagsError("Serializer not present for flag %s" % self.name)
     if self.value is None:
       return ''
 

@@ -92,18 +92,18 @@ class VirusPlacer(object):
     self.virus_number = virus_number
     if (virus_number > (rows-(combo_length-1))*cols or virus_number < 0 or
         combo_length <= 1):
-      raise VirusPlacementError, "invalid arguments"
-    self.cells = [[None for c in xrange(cols)] for r in xrange(rows)]
+      raise VirusPlacementError("invalid arguments")
+    self.cells = [[None for c in range(cols)] for r in range(rows)]
     
   def getViruses(self):
     self.start_time = time.time()
     cells = self._placeNextVirus(0,int(self.rows*MIN_ROW_LIMIT_PERCENT))
-    if not cells: raise VirusPlacementError, "could not place all viruses"
+    if not cells: raise VirusPlacementError("could not place all viruses")
     return cells
 
   def _placeNextVirus(self,viruses_placed,row_limit):
     if time.time() - self.start_time > MAX_PLACEMENT_SECONDS:
-      raise VirusPlacementError, "virus placement taking too long"
+      raise VirusPlacementError("virus placement taking too long")
     if self.virus_number - viruses_placed <= 0: return self.cells
     if float(viruses_placed)/(row_limit*self.cols) > self._concentrationThreshold(row_limit):
       row_limit += 1
@@ -134,9 +134,9 @@ class VirusPlacer(object):
          
   def _virusPositionOkay(self,r,c,color):
     for direction in [(0,1), (1,0), (-1,0), (0,-1)]:
-      for combo_pos in xrange(int(math.ceil(float(self.combo_length)/2.0))):
+      for combo_pos in range(int(math.ceil(float(self.combo_length)/2.0))):
         already_placed_cells = 0
-        for i in xrange(self.combo_length):
+        for i in range(self.combo_length):
           new_r = r + direction[0]*i - direction[0]*combo_pos
           new_c = c + direction[1]*i - direction[1]*combo_pos
           cell = self._getCellAt(new_r,new_c)
@@ -159,7 +159,7 @@ class ComboPlacer(object):
 
   def __init__(self, cols, max_combos=None):
     self.cols = cols
-    self.cells = [None for c in xrange(cols)]
+    self.cells = [None for c in range(cols)]
     self.combo_colors = []
     self.max_combos = max_combos
     if self.max_combos is None:
@@ -169,12 +169,12 @@ class ComboPlacer(object):
     self.start_time = time.time()
     self.combo_colors = combo_colors
     cells = self._placeNextCombo(0)
-    if not cells: raise ComboPlacementError, "could not place all combos"
+    if not cells: raise ComboPlacementError("could not place all combos")
     return cells
 
   def _placeNextCombo(self,placed_combos):
     if time.time() - self.start_time > MAX_PLACEMENT_SECONDS:
-      raise ComboPlacementError, "combo placement taking too long"
+      raise ComboPlacementError("combo placement taking too long")
     if len(self.combo_colors) <= 0: return self.cells
     if placed_combos == self.max_combos: return self.cells
     for c in _randomIndex(self.cols):
@@ -197,7 +197,7 @@ class ComboPlacer(object):
 
       
 def _randomIndex(length):
-  indices = range(length)
+  indices = list(range(length))
   while len(indices) > 0:
     r = random.randint(0,len(indices)-1)
     yield indices[r]
@@ -205,5 +205,5 @@ def _randomIndex(length):
     
     
 if __name__ == "__main__":
-  for i in xrange(17):
-    print i, _concentrationThreshold(16,4,i)
+  for i in range(17):
+    print(i, _concentrationThreshold(16,4,i))

@@ -229,4 +229,4 @@ class NetworkComlink(Comlink):
     self.sock.connect(self.address)
     self._ServerHandshake()
     self._WaitForGameStart()
-    print "done waiting"
+    print("done waiting")

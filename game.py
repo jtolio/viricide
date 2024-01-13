@@ -78,9 +78,9 @@ class Game(object):
     self.driver.CleanupGame()
     self.comlink.CleanupGame()
     if win:
-      print "Game Over: You Win!"
+      print("Game Over: You Win!")
     else:
-      print "Game Over: You did not win. :("
+      print("Game Over: You did not win. :(")
 
 
 def client():
@@ -105,13 +105,13 @@ def client():
 def main(argv):
   try:
     argv = FLAGS(argv)
-  except flags.FlagsError, e:
-    print "%s\nUsage: %s [flags]" % (e, sys.argv[0])
-    print "Try --help for more information"
+  except flags.FlagsError as e:
+    print("%s\nUsage: %s [flags]" % (e, sys.argv[0]))
+    print("Try --help for more information")
     return 1
   try: client()
-  except KeyboardInterrupt, e: pass
-  print "Goodbye."
+  except KeyboardInterrupt as e: pass
+  print("Goodbye.")
   return 0
 
 

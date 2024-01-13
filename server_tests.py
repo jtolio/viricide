@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from __future__ import with_statement
+
 import unittest, mocker, random
 from server import *
 
@@ -44,21 +44,21 @@ class ExtendedTestCase(mocker.MockerTestCase):
 
   def assertListEquals(self, list1, list2):
     try:
-      self.assertEquals(type(list1), type(list2))
-      self.assertEquals(type(list1), list)
-      self.assertEquals(len(list1), len(list2))
+      self.assertEqual(type(list1), type(list2))
+      self.assertEqual(type(list1), list)
+      self.assertEqual(len(list1), len(list2))
       for i, j in zip(list1, list2):
-        self.assertEquals(i, j)
-    except AssertionError, e:
-      raise AssertionError, "\n%s\n!=\n%s\n(%s)" % (list1, list2, e)
+        self.assertEqual(i, j)
+    except AssertionError as e:
+      raise AssertionError("\n%s\n!=\n%s\n(%s)" % (list1, list2, e))
 
   def assertListNotEquals(self, list1, list2):
-    self.assertEquals(type(list1), type(list2))
-    self.assertEquals(type(list1), list)
+    self.assertEqual(type(list1), type(list2))
+    self.assertEqual(type(list1), list)
     try:
       self.assertListEquals(list1, list2)
-    except AssertionError, e: return
-    raise AssertionError, "\n%s\n==\n%s" % (list1, list2)
+    except AssertionError as e: return
+    raise AssertionError("\n%s\n==\n%s" % (list1, list2))
 
 
 class TestViricidePlayer(ExtendedTestCase):
@@ -69,10 +69,10 @@ class TestViricidePlayer(ExtendedTestCase):
     self.mocker.replay()
     player_number = random.randint(0, 10000)
     x = ViricidePlayer(mock_socket, player_number, game)
-    self.assertEquals(x.sock, mock_socket)
-    self.assertEquals(x.player_number, player_number)
-    self.assertEquals(x.getState(), "active")
-    self.assertEquals(x.game, game)
+    self.assertEqual(x.sock, mock_socket)
+    self.assertEqual(x.player_number, player_number)
+    self.assertEqual(x.getState(), "active")
+    self.assertEqual(x.game, game)
   
   def testStates(self):
     mock_socket = self.mocker.mock()
@@ -86,7 +86,7 @@ class TestViricidePlayer(ExtendedTestCase):
       x = ViricidePlayer(mock_socket, player_number, None)
       x.setGameExit("won") # bypass the finish game_exit requirement
       x.setState(state)
-      self.assertEquals(x.getState(), state)
+      self.assertEqual(x.getState(), state)
     
     self.assertRaises(InvalidPlayerState, x.setState, "bad state")
   
@@ -102,13 +102,13 @@ class TestViricidePlayer(ExtendedTestCase):
     game = self.mocker.mock()
     self.mocker.replay()
     x = ViricidePlayer(mock_socket, 1, game)
-    self.assertEquals(x.getState(), "active")
+    self.assertEqual(x.getState(), "active")
     self.assertRaises(PlayerGameExitUnset, x.setState, "finished")
-    self.assertEquals(x.getGameExit(), "none")
+    self.assertEqual(x.getGameExit(), "none")
     x.setGameExit("won")
     x.setState("finished")
-    self.assertEquals(x.getGameExit(), "won")
-    self.assertEquals(x.getState(), "finished")
+    self.assertEqual(x.getGameExit(), "won")
+    self.assertEqual(x.getState(), "finished")
 
   def testGameExits(self):
     mock_socket = self.mocker.mock()
@@ -121,7 +121,7 @@ class TestViricidePlayer(ExtendedTestCase):
     for game_exit in ViricidePlayer.VALID_GAME_EXITS:
       x = ViricidePlayer(mock_socket, 1, game)
       x.setGameExit(game_exit)
-      self.assertEquals(x.getGameExit(), game_exit)
+      self.assertEqual(x.getGameExit(), game_exit)
     
     self.assertRaises(BadGameExitType, x.setGameExit, "bad game exit")
   
@@ -134,13 +134,13 @@ class TestViricidePlayer(ExtendedTestCase):
     self.mocker.replay()
     x = ViricidePlayer(mock_socket, 1, game)
     x.disconnect()
-    self.assertEquals(x.getState(), "disconnected")
-    self.assertEquals(x.getGameExit(), "lost")
+    self.assertEqual(x.getState(), "disconnected")
+    self.assertEqual(x.getGameExit(), "lost")
     # the following will fail if it tries to do sock.sendObject, as the mock
     # socket isn't expecting it
     x.sendObject("test_obj", short_int="nonce1")
-    self.assertEquals(x.getState(), "disconnected")
-    self.assertEquals(x.getGameExit(), "lost")
+    self.assertEqual(x.getState(), "disconnected")
+    self.assertEqual(x.getGameExit(), "lost")
     self.assertListEquals(self.all_args, [(x,)])
     
   def testSendObject2(self):
@@ -150,8 +150,8 @@ class TestViricidePlayer(ExtendedTestCase):
     self.mocker.replay()
     x = ViricidePlayer(mock_socket, 1, game)
     x.sendObject("test_obj", short_int="nonce1")
-    self.assertEquals(x.getState(), "active")
-    self.assertEquals(x.getGameExit(), "none")
+    self.assertEqual(x.getState(), "active")
+    self.assertEqual(x.getGameExit(), "none")
     self.assertListEquals(self.all_args, [])
   
   def testSendObject3(self):
@@ -165,8 +165,8 @@ class TestViricidePlayer(ExtendedTestCase):
     self.mocker.replay()
     x = ViricidePlayer(mock_socket, 1, game)
     x.sendObject("test_obj2", short_int="nonce2")
-    self.assertEquals(x.getState(), "disconnected")
-    self.assertEquals(x.getGameExit(), "lost")
+    self.assertEqual(x.getState(), "disconnected")
+    self.assertEqual(x.getGameExit(), "lost")
     self.assertListEquals(self.all_args, [(x,)])
     
   def testSendObject4(self):
@@ -182,8 +182,8 @@ class TestViricidePlayer(ExtendedTestCase):
     x.setGameExit("won")
     x.setState("finished")
     x.sendObject("test_obj2", short_int="nonce2")
-    self.assertEquals(x.getState(), "disconnected")
-    self.assertEquals(x.getGameExit(), "won")
+    self.assertEqual(x.getState(), "disconnected")
+    self.assertEqual(x.getGameExit(), "won")
     self.assertListEquals(self.all_args, [(x,)])
     
   def testSendObject5(self):
@@ -197,8 +197,8 @@ class TestViricidePlayer(ExtendedTestCase):
     self.mocker.replay()
     x = ViricidePlayer(mock_socket, 1, game)
     x.sendObject("test_obj2", short_int="nonce2")
-    self.assertEquals(x.getState(), "disconnected")
-    self.assertEquals(x.getGameExit(), "lost")
+    self.assertEqual(x.getState(), "disconnected")
+    self.assertEqual(x.getGameExit(), "lost")
     self.assertListEquals(self.all_args, [(x,)])
 
   def testGetObject1(self):
@@ -220,7 +220,7 @@ class TestViricidePlayer(ExtendedTestCase):
     self.mocker.result("nonce3")
     self.mocker.replay()
     x = ViricidePlayer(mock_socket, 1, game)
-    self.assertEquals(x.getObject(short_int="nonce1", timeout="nonce2"),
+    self.assertEqual(x.getObject(short_int="nonce1", timeout="nonce2"),
         "nonce3")
 
   def testGetObject3(self):
@@ -233,11 +233,11 @@ class TestViricidePlayer(ExtendedTestCase):
     mock_socket.close()
     self.mocker.replay()
     x = ViricidePlayer(mock_socket, 1, game)
-    self.assertEquals(x.getState(), "active")
-    self.assertEquals(x.getGameExit(), "none")
+    self.assertEqual(x.getState(), "active")
+    self.assertEqual(x.getGameExit(), "none")
     self.assertRaises(network.UnexpectedSocketClose, x.getObject)
-    self.assertEquals(x.getState(), "disconnected")
-    self.assertEquals(x.getGameExit(), "lost")    
+    self.assertEqual(x.getState(), "disconnected")
+    self.assertEqual(x.getGameExit(), "lost")    
     self.assertListEquals(self.all_args, [(x,)])
 
   def testGetObject4(self):
@@ -250,12 +250,12 @@ class TestViricidePlayer(ExtendedTestCase):
     mock_socket.close()
     self.mocker.replay()
     x = ViricidePlayer(mock_socket, 1, game)
-    self.assertEquals(x.getState(), "active")
-    self.assertEquals(x.getGameExit(), "none")
+    self.assertEqual(x.getState(), "active")
+    self.assertEqual(x.getGameExit(), "none")
     x.setGameExit("won")
     self.assertRaises(network.UnexpectedSocketClose, x.getObject)
-    self.assertEquals(x.getState(), "disconnected")
-    self.assertEquals(x.getGameExit(), "won")
+    self.assertEqual(x.getState(), "disconnected")
+    self.assertEqual(x.getGameExit(), "won")
     self.assertListEquals(self.all_args, [(x,)])
 
   def testGetObject5(self):
@@ -268,11 +268,11 @@ class TestViricidePlayer(ExtendedTestCase):
     mock_socket.close()
     self.mocker.replay()
     x = ViricidePlayer(mock_socket, 1, game)
-    self.assertEquals(x.getState(), "active")
-    self.assertEquals(x.getGameExit(), "none")
+    self.assertEqual(x.getState(), "active")
+    self.assertEqual(x.getGameExit(), "none")
     self.assertRaises(network.UnexpectedSocketClose, x.getObject)
-    self.assertEquals(x.getState(), "disconnected")
-    self.assertEquals(x.getGameExit(), "lost")    
+    self.assertEqual(x.getState(), "disconnected")
+    self.assertEqual(x.getGameExit(), "lost")    
     self.assertListEquals(self.all_args, [(x,)])
 
   def testGetObject6(self):
@@ -285,12 +285,12 @@ class TestViricidePlayer(ExtendedTestCase):
     mock_socket.close()
     self.mocker.replay()
     x = ViricidePlayer(mock_socket, 1, game)
-    self.assertEquals(x.getState(), "active")
-    self.assertEquals(x.getGameExit(), "none")
+    self.assertEqual(x.getState(), "active")
+    self.assertEqual(x.getGameExit(), "none")
     x.setGameExit("won")
     self.assertRaises(network.UnexpectedSocketClose, x.getObject)
-    self.assertEquals(x.getState(), "disconnected")
-    self.assertEquals(x.getGameExit(), "won")
+    self.assertEqual(x.getState(), "disconnected")
+    self.assertEqual(x.getGameExit(), "won")
     self.assertListEquals(self.all_args, [(x,)])
 
   def testDisconnect1(self):
@@ -393,9 +393,9 @@ class TestViricideGame(ExtendedTestCase):
     game_id = str(random.random())
     number_of_players = random.randint(1, 10000)
     x = ViricideGame(game_id, number_of_players, "nonce")
-    self.assertEquals(x.game_id, game_id)
-    self.assertEquals(x.starting_amount_of_players, number_of_players)
-    self.assertEquals(x.game_store, "nonce")
+    self.assertEqual(x.game_id, game_id)
+    self.assertEqual(x.starting_amount_of_players, number_of_players)
+    self.assertEqual(x.game_store, "nonce")
 
   
   def testBadPlayerAmount(self):
@@ -408,23 +408,23 @@ class TestViricideGame(ExtendedTestCase):
   def testConnectedAndActivePlayersHeartbeat(self):
     send_object_called = []
     def MockSendObject(obj):
-      self.assertEquals(len(obj), 1)
-      self.assertEquals(obj["message_type"], "heartbeat")
+      self.assertEqual(len(obj), 1)
+      self.assertEqual(obj["message_type"], "heartbeat")
       send_object_called.append("called")
     self.test_game.sendObject = MockSendObject
     self.test_game.connectedPlayers()
-    self.assertEquals(len(send_object_called), 0)
+    self.assertEqual(len(send_object_called), 0)
     self.test_game.connectedPlayers(check_with_heartbeat=True)
-    self.assertEquals(len(send_object_called), 1)
+    self.assertEqual(len(send_object_called), 1)
     self.test_game.activePlayers()
-    self.assertEquals(len(send_object_called), 1)
+    self.assertEqual(len(send_object_called), 1)
     self.test_game.activePlayers(check_with_heartbeat=True)
-    self.assertEquals(len(send_object_called), 2)
+    self.assertEqual(len(send_object_called), 2)
 
   def testPlayerFilters(self):
     def MockSendObject(obj):
-      self.assertEquals(len(obj), 1)
-      self.assertEquals(obj["message_type"], "heartbeat")
+      self.assertEqual(len(obj), 1)
+      self.assertEqual(obj["message_type"], "heartbeat")
     self.test_game.sendObject = MockSendObject
     self.assertListEquals(self.test_game.all_player_list, [])
 
@@ -432,7 +432,7 @@ class TestViricideGame(ExtendedTestCase):
     game = self.mocker.mock()
     self.mocker.replay()
     j = 0
-    for i in xrange(3):
+    for i in range(3):
       for state in ViricidePlayer.VALID_STATES:
         player = ViricidePlayer(mock_socket, j, game)
         player.setGameExit("won") # bypass the finish game_exit requirement
@@ -440,35 +440,35 @@ class TestViricideGame(ExtendedTestCase):
         self.test_game.all_player_list.append(player)
         j += 1
 
-    self.assertEquals([x.player_number for x in self.test_game.activePlayers()],
+    self.assertEqual([x.player_number for x in self.test_game.activePlayers()],
         [0, 3, 6])
-    self.assertEquals([x.player_number
+    self.assertEqual([x.player_number
         for x in self.test_game.connectedPlayers()], [0, 1, 3, 4, 6, 7])
 
   def testAddPlayer(self):
     mock_socket = self.mocker.mock()
     mock_socket_2 = self.mocker.mock()
     self.mocker.replay()
-    self.assertEquals(len(self.test_game.activePlayers()), 0)
+    self.assertEqual(len(self.test_game.activePlayers()), 0)
     new_player = self.test_game.addPlayer(mock_socket)
-    self.assertEquals(len(self.test_game.activePlayers()), 1)
-    self.assertEquals(len(self.test_game.all_player_list), 1)
+    self.assertEqual(len(self.test_game.activePlayers()), 1)
+    self.assertEqual(len(self.test_game.all_player_list), 1)
     self.assertIn(new_player, self.test_game.activePlayers())
     self.assertIn(new_player, self.test_game.all_player_list)
 
     new_player_2 = self.test_game.addPlayer(mock_socket_2)
     new_player_2.setGameExit("won") # bypass the finish game_exit requirement
     new_player_2.setState("finished")
-    self.assertEquals(len(self.test_game.activePlayers()), 1)
-    self.assertEquals(len(self.test_game.connectedPlayers()), 2)
-    self.assertEquals(len(self.test_game.all_player_list), 2)
+    self.assertEqual(len(self.test_game.activePlayers()), 1)
+    self.assertEqual(len(self.test_game.connectedPlayers()), 2)
+    self.assertEqual(len(self.test_game.all_player_list), 2)
     self.assertNotIn(new_player_2, self.test_game.activePlayers())
     self.assertIn(new_player_2, self.test_game.connectedPlayers())
     self.assertIn(new_player_2, self.test_game.all_player_list)
-    self.assertEquals(new_player_2.getState(), "finished")
+    self.assertEqual(new_player_2.getState(), "finished")
     
-    self.assertNotEquals(new_player, new_player_2)
-    self.assertNotEquals(new_player.player_number, new_player_2.player_number)
+    self.assertNotEqual(new_player, new_player_2)
+    self.assertNotEqual(new_player.player_number, new_player_2.player_number)
 
   def testAddPlayerSameSocket(self):
     mock_socket = self.mocker.mock()
@@ -487,31 +487,31 @@ class TestViricideGame(ExtendedTestCase):
     new_player_2 = self.test_game.addPlayer(mock_socket_2)
     new_player_2.setGameExit("won")
     new_player_2.setState("finished")
-    self.assertEquals(len(self.test_game.all_player_list), 2)
-    self.assertEquals(len(self.test_game.connectedPlayers()), 2)
-    self.assertEquals(len(self.test_game.activePlayers()), 1)
+    self.assertEqual(len(self.test_game.all_player_list), 2)
+    self.assertEqual(len(self.test_game.connectedPlayers()), 2)
+    self.assertEqual(len(self.test_game.activePlayers()), 1)
     
     self.assertListEquals(["active", "finished"],
         [x.getState() for x in self.test_game.all_player_list])
 
     new_player.disconnect()
-    self.assertEquals(len(self.test_game.all_player_list), 2)
-    self.assertEquals(len(self.test_game.connectedPlayers()), 1)
-    self.assertEquals(len(self.test_game.activePlayers()), 0)
-    self.assertEquals(new_player.getState(), "disconnected")
+    self.assertEqual(len(self.test_game.all_player_list), 2)
+    self.assertEqual(len(self.test_game.connectedPlayers()), 1)
+    self.assertEqual(len(self.test_game.activePlayers()), 0)
+    self.assertEqual(new_player.getState(), "disconnected")
     self.assertListEquals(["disconnected", "finished"],
         [x.getState() for x in self.test_game.all_player_list])
 
     new_player_2.disconnect()
-    self.assertEquals(len(self.test_game.all_player_list), 2)
-    self.assertEquals(len(self.test_game.connectedPlayers()), 0)
-    self.assertEquals(len(self.test_game.activePlayers()), 0)
-    self.assertEquals(new_player_2.getState(), "disconnected")
+    self.assertEqual(len(self.test_game.all_player_list), 2)
+    self.assertEqual(len(self.test_game.connectedPlayers()), 0)
+    self.assertEqual(len(self.test_game.activePlayers()), 0)
+    self.assertEqual(new_player_2.getState(), "disconnected")
     self.assertListEquals(["disconnected", "disconnected"],
         [x.getState() for x in self.test_game.all_player_list])
     
-    self.assertEquals(new_player.getGameExit(), "lost")
-    self.assertEquals(new_player_2.getGameExit(), "won")
+    self.assertEqual(new_player.getGameExit(), "lost")
+    self.assertEqual(new_player_2.getGameExit(), "won")
     self.assertListEquals(self.all_args, [(new_player,), (new_player_2,)])
 
   def testFinishedPlayerBadGameExit(self):
@@ -590,16 +590,16 @@ class TestViricideGame(ExtendedTestCase):
     new_player3 = test_game_3.addPlayer(mock_socket)
     test_game_3.endGame = self.addArgsIfCalled
     test_game_3.finishPlayer(new_player3, True)
-    self.assertEquals(new_player3.getState(), "finished")
-    self.assertEquals(new_player3.getGameExit(), "won")
+    self.assertEqual(new_player3.getState(), "finished")
+    self.assertEqual(new_player3.getGameExit(), "won")
     self.assertListEquals(self.all_args, [()])
     
     test_game_4 = ViricideGame("test_game_id_4", 1, None)
     new_player4 = test_game_4.addPlayer(mock_socket)
     test_game_4.endGame = self.addArgsIfCalled
     test_game_4.finishPlayer(new_player4, False)
-    self.assertEquals(new_player4.getState(), "finished")
-    self.assertEquals(new_player4.getGameExit(), "lost")
+    self.assertEqual(new_player4.getState(), "finished")
+    self.assertEqual(new_player4.getGameExit(), "lost")
     self.assertListEquals(self.all_args, [(), ()])
 
   def setUpFinishedPlayerForMultiplayer(self, sockets_that_close=[],
@@ -607,7 +607,7 @@ class TestViricideGame(ExtendedTestCase):
       add_notify_args=True):
     mock_game_store = self.mocker.mock(ViricideGameStore)
     game = self.mocker.mock(ViricideGame)
-    for i in xrange(notify_disconnected_players):
+    for i in range(notify_disconnected_players):
       game.notifyDisconnectedPlayer
       def temp(x):
         if add_notify_args:
@@ -615,7 +615,7 @@ class TestViricideGame(ExtendedTestCase):
       self.mocker.result(temp)
     mock_sockets = []
     players = []
-    for i in xrange(5):
+    for i in range(5):
       mock_sockets.append(self.mocker.mock())
       if i in sockets_that_close:
         mock_sockets[i].close()
@@ -623,7 +623,7 @@ class TestViricideGame(ExtendedTestCase):
       mock_game_store.removeGameFromGameStore(game_id)
     self.mocker.replay() #expected by testAbortGame
     test_game = ViricideGame("test_game", 5, mock_game_store)
-    for i in xrange(5):
+    for i in range(5):
       players.append(test_game.addPlayer(mock_sockets[i]))
       players[i].game = game
     return test_game, players
@@ -636,7 +636,7 @@ class TestViricideGame(ExtendedTestCase):
     if winning_id is None:
       self.assertIs(game.winningPlayer(), None)
     else:
-      self.assertEquals(game.winningPlayer(),
+      self.assertEqual(game.winningPlayer(),
           game.all_player_list[winning_id])
           
   def testNotifyDisconnectedPlayer(self):
@@ -693,23 +693,23 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [0, 1, 2, 3, 4], [0, 1, 2, 3, 4], None)
 
     test_game.finishPlayer(player[1], False)
-    self.assertEquals(player[1].getState(), "finished")
-    self.assertEquals(player[1].getGameExit(), "lost")
+    self.assertEqual(player[1].getState(), "finished")
+    self.assertEqual(player[1].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},)])
     self.assertPlayerStates(test_game, [0, 2, 3, 4], [0, 1, 2, 3, 4], None)
 
     test_game.finishPlayer(player[0], True)
-    self.assertEquals(player[0].getState(), "finished")
-    self.assertEquals(player[0].getGameExit(), "won")
+    self.assertEqual(player[0].getState(), "finished")
+    self.assertEqual(player[0].getGameExit(), "won")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
         ({'player_number': 0, 'message_type': 'player_done'},), ()])
     self.assertPlayerStates(test_game, [2, 3, 4], [0, 1, 2, 3, 4], 0)
 
     test_game.finishPlayer(player[2], False)
-    self.assertEquals(player[2].getState(), "finished")
-    self.assertEquals(player[2].getGameExit(), "lost")
+    self.assertEqual(player[2].getState(), "finished")
+    self.assertEqual(player[2].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
       ({'player_number': 1, 'message_type': 'player_done'},), ({'player_number':
       0, 'message_type': 'player_done'},), (), ({'player_number': 2,
@@ -717,8 +717,8 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [3, 4], [0, 1, 2, 3, 4], 0)
 
     test_game.finishPlayer(player[3], True)
-    self.assertEquals(player[3].getState(), "finished")
-    self.assertEquals(player[3].getGameExit(), "lost")
+    self.assertEqual(player[3].getState(), "finished")
+    self.assertEqual(player[3].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
         ({'player_number': 0, 'message_type': 'player_done'},), (),
@@ -738,8 +738,8 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [1, 2, 3, 4], [1, 2, 3, 4], None)
 
     test_game.finishPlayer(player[1], False)
-    self.assertEquals(player[1].getState(), "finished")
-    self.assertEquals(player[1].getGameExit(), "lost")
+    self.assertEqual(player[1].getState(), "finished")
+    self.assertEqual(player[1].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [("notify_disconnected_player",
         player[0]), ({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},)])
@@ -749,8 +749,8 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [3, 4], [1, 3, 4], None)
     
     test_game.finishPlayer(player[3], False)
-    self.assertEquals(player[3].getState(), "finished")
-    self.assertEquals(player[3].getGameExit(), "lost")
+    self.assertEqual(player[3].getState(), "finished")
+    self.assertEqual(player[3].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [("notify_disconnected_player",
         player[0]), ({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
@@ -760,8 +760,8 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [4], [1, 3, 4], None)
     
     test_game.finishPlayer(player[4], False)
-    self.assertEquals(player[4].getState(), "finished")
-    self.assertEquals(player[4].getGameExit(), "won")
+    self.assertEqual(player[4].getState(), "finished")
+    self.assertEqual(player[4].getGameExit(), "won")
     self.assertListEquals(self.all_args, [("notify_disconnected_player",
         player[0]), ({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
@@ -771,11 +771,11 @@ class TestViricideGame(ExtendedTestCase):
         ({'player_number': 4, 'message_type': 'player_done'},), ()])
     self.assertPlayerStates(test_game, [], [1, 3, 4], 4)
 
-    self.assertEquals(player[2].getState(), "disconnected")
-    self.assertEquals(player[2].getGameExit(), "lost")
+    self.assertEqual(player[2].getState(), "disconnected")
+    self.assertEqual(player[2].getGameExit(), "lost")
     test_game.finishPlayer(player[2], True)
-    self.assertEquals(player[2].getState(), "disconnected")
-    self.assertEquals(player[2].getGameExit(), "lost")
+    self.assertEqual(player[2].getState(), "disconnected")
+    self.assertEqual(player[2].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [("notify_disconnected_player",
         player[0]), ({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
@@ -794,15 +794,15 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [0, 1, 2, 3, 4], [0, 1, 2, 3, 4], None)
 
     test_game.finishPlayer(player[1], False)
-    self.assertEquals(player[1].getState(), "finished")
-    self.assertEquals(player[1].getGameExit(), "lost")
+    self.assertEqual(player[1].getState(), "finished")
+    self.assertEqual(player[1].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},)])
     self.assertPlayerStates(test_game, [0, 2, 3, 4], [0, 1, 2, 3, 4], None)
 
     test_game.finishPlayer(player[0], True)
-    self.assertEquals(player[0].getState(), "finished")
-    self.assertEquals(player[0].getGameExit(), "won")
+    self.assertEqual(player[0].getState(), "finished")
+    self.assertEqual(player[0].getGameExit(), "won")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
         ({'player_number': 0, 'message_type': 'player_done'},), ()])
@@ -812,8 +812,8 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [2, 3, 4], [1, 2, 3, 4], 0)
 
     test_game.finishPlayer(player[2], False)
-    self.assertEquals(player[2].getState(), "finished")
-    self.assertEquals(player[2].getGameExit(), "lost")
+    self.assertEqual(player[2].getState(), "finished")
+    self.assertEqual(player[2].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
         ({'player_number': 0, 'message_type': 'player_done'},), (),
@@ -822,8 +822,8 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [3, 4], [1, 2, 3, 4], 0)
 
     test_game.finishPlayer(player[3], True)
-    self.assertEquals(player[3].getState(), "finished")
-    self.assertEquals(player[3].getGameExit(), "lost")
+    self.assertEqual(player[3].getState(), "finished")
+    self.assertEqual(player[3].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
         ({'player_number': 0, 'message_type': 'player_done'},), (),
@@ -841,8 +841,8 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [0, 1, 2, 3, 4], [0, 1, 2, 3, 4], None)
         
     test_game.finishPlayer(player[1], False)
-    self.assertEquals(player[1].getState(), "finished")
-    self.assertEquals(player[1].getGameExit(), "lost")
+    self.assertEqual(player[1].getState(), "finished")
+    self.assertEqual(player[1].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({"message_type": "heartbeat"},),
         ({"message_type": "player_done", "player_number": 1},)])
     self.assertPlayerStates(test_game, [0, 2, 3, 4], [0, 1, 2, 3, 4], None)
@@ -854,8 +854,8 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [3,4], [1,3,4], None)
     
     test_game.finishPlayer(player[3], False)
-    self.assertEquals(player[3].getState(), "finished")
-    self.assertEquals(player[3].getGameExit(), "lost")
+    self.assertEqual(player[3].getState(), "finished")
+    self.assertEqual(player[3].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
         ("notify_disconnected_player", player[0]),
@@ -865,13 +865,13 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [4], [1,3,4], None)
 
     player[4].disconnect()
-    self.assertEquals(player[4].getState(), "disconnected")
-    self.assertEquals(player[4].getGameExit(), "lost")
+    self.assertEqual(player[4].getState(), "disconnected")
+    self.assertEqual(player[4].getGameExit(), "lost")
     self.assertPlayerStates(test_game, [], [1,3], None)
 
     test_game.finishPlayer(player[4], True)
-    self.assertEquals(player[4].getState(), "disconnected")
-    self.assertEquals(player[4].getGameExit(), "lost")
+    self.assertEqual(player[4].getState(), "disconnected")
+    self.assertEqual(player[4].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
         ("notify_disconnected_player", player[0]),
@@ -886,8 +886,8 @@ class TestViricideGame(ExtendedTestCase):
     test_game.sendObject = self.addArgsIfCalled
     self.assertPlayerStates(test_game, [0, 1, 2, 3, 4], [0, 1, 2, 3, 4], None)
     test_game.finishPlayer(player[1], False, force_game_exit="won")
-    self.assertEquals(player[1].getState(), "disconnected")
-    self.assertEquals(player[1].getGameExit(), "won")
+    self.assertEqual(player[1].getState(), "disconnected")
+    self.assertEqual(player[1].getGameExit(), "won")
     self.assertListEquals(self.all_args, [({'player_number': 1, 'message_type':
         'player_done'},), ({'player_number': 0, 'message_type':
         'player_done'},), ({'player_number': 2, 'message_type':
@@ -913,8 +913,8 @@ class TestViricideGame(ExtendedTestCase):
     test_game.sendObject = self.addArgsIfCalled
     self.assertPlayerStates(test_game, [0], [0], None)
     test_game.finishPlayer(player, True, force_game_exit="lost")
-    self.assertEquals(player.getState(), "disconnected")
-    self.assertEquals(player.getGameExit(), "lost")
+    self.assertEqual(player.getState(), "disconnected")
+    self.assertEqual(player.getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'player_number': 0, 'message_type':
         'player_done'},), ({'message_type': 'game_over',
         'winning_player_number': None},)])
@@ -937,9 +937,9 @@ class TestViricideGame(ExtendedTestCase):
     self.all_args = []
     test_game_2.sendObject = self.addArgsIfCalled
     test_game_2.addPlayer(mock_socket)
-    self.assert_(test_game_2.readyToStart())
+    self.assertTrue(test_game_2.readyToStart())
     test_game_2.started = True
-    self.assert_(not test_game_2.readyToStart())
+    self.assertTrue(not test_game_2.readyToStart())
     self.assertRaises(NotReadyToStart, test_game_2.startGame)
     self.assertListEquals(self.all_args, [({"message_type": "heartbeat"},),
         ({"message_type": "heartbeat"},), ({"message_type": "heartbeat"},)])
@@ -953,17 +953,17 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [0, 1, 2, 3, 4], [0, 1, 2, 3, 4], None)
 
     test_game.finishPlayer(player[1], False)
-    self.assertEquals(test_game.game_over, False)
-    self.assertEquals(player[1].getState(), "finished")
-    self.assertEquals(player[1].getGameExit(), "lost")
+    self.assertEqual(test_game.game_over, False)
+    self.assertEqual(player[1].getState(), "finished")
+    self.assertEqual(player[1].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},)])
     self.assertPlayerStates(test_game, [0, 2, 3, 4], [0, 1, 2, 3, 4], None)
 
     test_game.finishPlayer(player[0], True)
-    self.assertEquals(test_game.game_over, True)
-    self.assertEquals(player[0].getState(), "disconnected")
-    self.assertEquals(player[0].getGameExit(), "won")
+    self.assertEqual(test_game.game_over, True)
+    self.assertEqual(player[0].getState(), "disconnected")
+    self.assertEqual(player[0].getGameExit(), "won")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
         ({'player_number': 0, 'message_type': 'player_done'},),
@@ -985,17 +985,17 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [0, 1, 2, 3, 4], [0, 1, 2, 3, 4], None)
 
     test_game.finishPlayer(player[1], False)
-    self.assertEquals(test_game.game_over, False)
-    self.assertEquals(player[1].getState(), "finished")
-    self.assertEquals(player[1].getGameExit(), "lost")
+    self.assertEqual(test_game.game_over, False)
+    self.assertEqual(player[1].getState(), "finished")
+    self.assertEqual(player[1].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},)])
     self.assertPlayerStates(test_game, [0, 2, 3, 4], [0, 1, 2, 3, 4], None)
 
     test_game.finishPlayer(player[0], False)
-    self.assertEquals(test_game.game_over, False)
-    self.assertEquals(player[0].getState(), "finished")
-    self.assertEquals(player[0].getGameExit(), "lost")
+    self.assertEqual(test_game.game_over, False)
+    self.assertEqual(player[0].getState(), "finished")
+    self.assertEqual(player[0].getGameExit(), "lost")
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
         ({'message_type': 'heartbeat'},), ({'player_number': 0, 'message_type':
@@ -1003,7 +1003,7 @@ class TestViricideGame(ExtendedTestCase):
     self.assertPlayerStates(test_game, [2,3,4], [0, 1, 2, 3, 4], None)
     
     test_game.endGame()
-    self.assertEquals(test_game.game_over, True)
+    self.assertEqual(test_game.game_over, True)
     self.assertListEquals(self.all_args, [({'message_type': 'heartbeat'},),
         ({'player_number': 1, 'message_type': 'player_done'},),
         ({'message_type': 'heartbeat'},), ({'player_number': 0, 'message_type':
@@ -1032,28 +1032,28 @@ class TestViricideGame(ExtendedTestCase):
     test_game.game_start_event = test_event_2
     
     self.assertPlayerStates(test_game, [0, 1, 2, 3, 4], [0, 1, 2, 3, 4], None)
-    self.assertEquals(test_game.started, False)
-    self.assertEquals(test_game.game_over, False)
+    self.assertEqual(test_game.started, False)
+    self.assertEqual(test_game.game_over, False)
     
     test_game.abortGame()
     self.assertPlayerStates(test_game, [], [], None)
-    self.assertEquals(test_game.started, True)
-    self.assertEquals(test_game.game_over, True)
+    self.assertEqual(test_game.started, True)
+    self.assertEqual(test_game.game_over, True)
     self.assertListEquals(self.all_args, [("notify_disconnected_player",
-        player[i]) for i in xrange(5)])
+        player[i]) for i in range(5)])
 
   def testGetVirusPlacements(self):
-    self.assertEquals(len(self.test_game.virus_placements), 0)
+    self.assertEqual(len(self.test_game.virus_placements), 0)
     virus_placements_1 = self.test_game.getVirusPlacements(80,40,4,25)
-    self.assertEquals(len(self.test_game.virus_placements), 1)
+    self.assertEqual(len(self.test_game.virus_placements), 1)
     virus_placements_2 = self.test_game.getVirusPlacements(79,39,5,24)
-    self.assertEquals(len(self.test_game.virus_placements), 2)
+    self.assertEqual(len(self.test_game.virus_placements), 2)
     self.assertListNotEquals(virus_placements_1, virus_placements_2)
     virus_placements_3 = self.test_game.getVirusPlacements(80,40,4,25)
-    self.assertEquals(len(self.test_game.virus_placements), 2)
+    self.assertEqual(len(self.test_game.virus_placements), 2)
     self.assertListEquals(virus_placements_1, virus_placements_3)
     virus_placements_4 = self.test_game.getVirusPlacements(79,39,5,24)
-    self.assertEquals(len(self.test_game.virus_placements), 2)
+    self.assertEqual(len(self.test_game.virus_placements), 2)
     self.assertListEquals(virus_placements_2, virus_placements_4)
     
   def testGetNewPills(self):
@@ -1063,31 +1063,31 @@ class TestViricideGame(ExtendedTestCase):
     # consistent. if we get errors everytime, then perhaps there is a more
     # endemic problem. so run it a few times
     assertion_errors = []
-    for i in xrange(3):
+    for i in range(3):
       try:
         test_game = ViricideGame("test_game", 3, None)
-        self.assertEquals(len(test_game.new_pill_list), 0)
+        self.assertEqual(len(test_game.new_pill_list), 0)
         pill1 = test_game.getNewPills(6)
-        self.assertEquals(len(test_game.new_pill_list), 7)
+        self.assertEqual(len(test_game.new_pill_list), 7)
         pill2 = test_game.getNewPills(6)
-        self.assertEquals(len(test_game.new_pill_list), 7)
+        self.assertEqual(len(test_game.new_pill_list), 7)
         self.assertListEquals(pill1, pill2)
         pill3 = test_game.getNewPills(3)
-        self.assertEquals(len(test_game.new_pill_list), 7)
+        self.assertEqual(len(test_game.new_pill_list), 7)
         self.assertListNotEquals(pill1, pill3)
         pill4 = test_game.getNewPills(3)
-        self.assertEquals(len(test_game.new_pill_list), 7)
+        self.assertEqual(len(test_game.new_pill_list), 7)
         self.assertListEquals(pill4, pill3)
         pill5 = test_game.getNewPills(0)
-        self.assertEquals(len(test_game.new_pill_list), 7)
+        self.assertEqual(len(test_game.new_pill_list), 7)
         pill6 = test_game.getNewPills(7)
-        self.assertEquals(len(test_game.new_pill_list), 8)
+        self.assertEqual(len(test_game.new_pill_list), 8)
         pill7 = test_game.getNewPills(20)
-        self.assertEquals(len(test_game.new_pill_list), 21)
-      except AssertionError, e:
+        self.assertEqual(len(test_game.new_pill_list), 21)
+      except AssertionError as e:
         assertion_errors.append(e)
     if len(assertion_errors) > 2:
-      raise AssertionError, ", ".join([str(e) for e in assertion_errors])
+      raise AssertionError(", ".join([str(e) for e in assertion_errors]))
   
   def testSendObject(self):
     test_game, players = self.setUpFinishedPlayerForMultiplayer([3, 2, 0, 1, 4],
@@ -1116,7 +1116,7 @@ class TestViricideGame(ExtendedTestCase):
         (len(players) - 1)) + [{'short_int': 'nonce6'}] * (len(players) - 1)))
     self.all_args, self.all_kwargs = [], []
     test_game.finishPlayer(players[4], True)
-    self.assertEquals(test_game.winningPlayer(), players[4])
+    self.assertEqual(test_game.winningPlayer(), players[4])
     test_game.sendObject("test_obj4", short_int="nonce7")
     self.assertListEquals(self.all_args, [({"message_type": "player_done",
         "player_number": 4},)] * (len(players) - 1) + [({"message_type":
@@ -1128,7 +1128,7 @@ class TestViricideGame(ExtendedTestCase):
         ((len(players) - 1) * 4))
     self.all_args, self.all_kwargs = [], []
     players[2].disconnect()
-    self.assertEquals(test_game.winningPlayer(), players[4])
+    self.assertEqual(test_game.winningPlayer(), players[4])
     test_game.sendObject("test_obj5", short_int="nonce8")
     self.assertListEquals(self.all_args, [])
     self.assertListEquals(self.all_kwargs, [])
@@ -1137,23 +1137,23 @@ class TestViricideGame(ExtendedTestCase):
     test_game, player = self.setUpFinishedPlayerForMultiplayer([1,2,4], [], 3)
     for p in player:
       p.sendObject = self.addArgsIfCalled
-    self.assertEquals(test_game.activePlayerAfter(player[0]), player[1])
-    self.assertEquals(test_game.activePlayerAfter(player[1]), player[2])
-    self.assertEquals(test_game.activePlayerAfter(player[2]), player[3])
-    self.assertEquals(test_game.activePlayerAfter(player[3]), player[4])
-    self.assertEquals(test_game.activePlayerAfter(player[4]), player[0])
+    self.assertEqual(test_game.activePlayerAfter(player[0]), player[1])
+    self.assertEqual(test_game.activePlayerAfter(player[1]), player[2])
+    self.assertEqual(test_game.activePlayerAfter(player[2]), player[3])
+    self.assertEqual(test_game.activePlayerAfter(player[3]), player[4])
+    self.assertEqual(test_game.activePlayerAfter(player[4]), player[0])
     player[1].disconnect()
-    self.assertEquals(test_game.activePlayerAfter(player[0]), player[2])
-    self.assertEquals(test_game.activePlayerAfter(player[2]), player[3])
-    self.assertEquals(test_game.activePlayerAfter(player[3]), player[4])
-    self.assertEquals(test_game.activePlayerAfter(player[4]), player[0])
+    self.assertEqual(test_game.activePlayerAfter(player[0]), player[2])
+    self.assertEqual(test_game.activePlayerAfter(player[2]), player[3])
+    self.assertEqual(test_game.activePlayerAfter(player[3]), player[4])
+    self.assertEqual(test_game.activePlayerAfter(player[4]), player[0])
     player[4].disconnect()
-    self.assertEquals(test_game.activePlayerAfter(player[0]), player[2])
-    self.assertEquals(test_game.activePlayerAfter(player[2]), player[3])
-    self.assertEquals(test_game.activePlayerAfter(player[3]), player[0])
+    self.assertEqual(test_game.activePlayerAfter(player[0]), player[2])
+    self.assertEqual(test_game.activePlayerAfter(player[2]), player[3])
+    self.assertEqual(test_game.activePlayerAfter(player[3]), player[0])
     test_game.finishPlayer(player[3], False)
-    self.assertEquals(test_game.activePlayerAfter(player[0]), player[2])
-    self.assertEquals(test_game.activePlayerAfter(player[2]), player[0])
+    self.assertEqual(test_game.activePlayerAfter(player[0]), player[2])
+    self.assertEqual(test_game.activePlayerAfter(player[2]), player[0])
     player[2].disconnect()
     self.assertIs(test_game.activePlayerAfter(player[0]), None)
     self.assertRaises(AssertionError, test_game.activePlayerAfter, player[1])
@@ -1172,14 +1172,14 @@ class TestViricideGame(ExtendedTestCase):
         ["test_game"], 5)
     for p in player:
       p.sendObject = self.addArgsIfCalled
-    self.assertEquals(test_game.activePlayerAfter(player[0]), player[1])
-    self.assertEquals(test_game.activePlayerAfter(player[1]), player[2])
-    self.assertEquals(test_game.activePlayerAfter(player[2]), player[3])
-    self.assertEquals(test_game.activePlayerAfter(player[3]), player[4])
-    self.assertEquals(test_game.activePlayerAfter(player[4]), player[0])
+    self.assertEqual(test_game.activePlayerAfter(player[0]), player[1])
+    self.assertEqual(test_game.activePlayerAfter(player[1]), player[2])
+    self.assertEqual(test_game.activePlayerAfter(player[2]), player[3])
+    self.assertEqual(test_game.activePlayerAfter(player[3]), player[4])
+    self.assertEqual(test_game.activePlayerAfter(player[4]), player[0])
     test_game.finishPlayer(player[3], True)
-    self.assertEquals(test_game.game_over, True)
-    self.assertEquals(test_game.winningPlayer(), player[3])
+    self.assertEqual(test_game.game_over, True)
+    self.assertEqual(test_game.winningPlayer(), player[3])
     self.assertRaises(AssertionError, test_game.activePlayerAfter, player[0])
     self.assertRaises(AssertionError, test_game.activePlayerAfter, player[1])
     self.assertRaises(AssertionError, test_game.activePlayerAfter, player[2])
@@ -1192,7 +1192,7 @@ class TestViricideGame(ExtendedTestCase):
     sent_args.extend([({'message_type': 'game_over', "winning_player_number":
         3},)] * len(player))
     sent_args.extend([("notify_disconnected_player", player[i])
-        for i in xrange(5)])
+        for i in range(5)])
     self.assertListEquals(self.all_args, sent_args)
     self.assertListEquals(self.all_kwargs, [{"short_int": True}] *
         (len(player)**2+len(player)) + [{}] * len(player))
@@ -1236,50 +1236,50 @@ class TestViricideGameStore(ExtendedTestCase):
 
   def testInit(self):
     test_game_store = ViricideGameStore(timeout_thread_class="nonce")
-    self.assertEquals(len(test_game_store.games_dict), 0)
-    self.assertEquals(test_game_store.timeout_thread_class, "nonce")
+    self.assertEqual(len(test_game_store.games_dict), 0)
+    self.assertEqual(test_game_store.timeout_thread_class, "nonce")
   
   def testGetGame(self):
     test_game_store = ViricideGameStore(timeout_thread_class=None)
-    self.assertEquals(len(test_game_store.games_dict), 0)
+    self.assertEqual(len(test_game_store.games_dict), 0)
     test_game_store.games_dict["test_game_id_1"] = "nonce"
-    self.assertEquals(len(test_game_store.games_dict), 1)
-    self.assertEquals(test_game_store.getGame("test_game_id_1"), "nonce")
-    self.assertEquals(test_game_store.getGame("test_game_id_2"), None)
+    self.assertEqual(len(test_game_store.games_dict), 1)
+    self.assertEqual(test_game_store.getGame("test_game_id_1"), "nonce")
+    self.assertEqual(test_game_store.getGame("test_game_id_2"), None)
   
   def testEndGame(self):
     test_game_store = ViricideGameStore(timeout_thread_class=None)
-    self.assertEquals(len(test_game_store.games_dict), 0)
+    self.assertEqual(len(test_game_store.games_dict), 0)
     test_game = self.mocker.mock(ViricideGame)
     test_game.endGame()
     self.mocker.replay()
     test_game_store.games_dict["test_game_id_1"] = test_game
-    self.assertEquals(test_game_store.getGame("test_game_id_1"), test_game)
-    self.assertEquals(test_game_store.getGame("test_game_id_2"), None)
-    self.assertEquals(len(test_game_store.games_dict), 1)
+    self.assertEqual(test_game_store.getGame("test_game_id_1"), test_game)
+    self.assertEqual(test_game_store.getGame("test_game_id_2"), None)
+    self.assertEqual(len(test_game_store.games_dict), 1)
     test_game_store.endGame("test_game_id_2")
-    self.assertEquals(len(test_game_store.games_dict), 1)
+    self.assertEqual(len(test_game_store.games_dict), 1)
     test_game_store.endGame("test_game_id_1")
-    self.assertEquals(len(test_game_store.games_dict), 1)
-    self.assertEquals(test_game_store.getGame("test_game_id_1"), test_game)
-    self.assertEquals(test_game_store.getGame("test_game_id_2"), None)
+    self.assertEqual(len(test_game_store.games_dict), 1)
+    self.assertEqual(test_game_store.getGame("test_game_id_1"), test_game)
+    self.assertEqual(test_game_store.getGame("test_game_id_2"), None)
   
   def testAbortGame(self):
     test_game_store = ViricideGameStore(timeout_thread_class=None)
-    self.assertEquals(len(test_game_store.games_dict), 0)
+    self.assertEqual(len(test_game_store.games_dict), 0)
     test_game = self.mocker.mock(ViricideGame)
     test_game.abortGame()
     self.mocker.replay()
     test_game_store.games_dict["test_game_id_1"] = test_game
-    self.assertEquals(test_game_store.getGame("test_game_id_1"), test_game)
-    self.assertEquals(test_game_store.getGame("test_game_id_2"), None)
-    self.assertEquals(len(test_game_store.games_dict), 1)
+    self.assertEqual(test_game_store.getGame("test_game_id_1"), test_game)
+    self.assertEqual(test_game_store.getGame("test_game_id_2"), None)
+    self.assertEqual(len(test_game_store.games_dict), 1)
     test_game_store.abortGame("test_game_id_2")
-    self.assertEquals(len(test_game_store.games_dict), 1)
+    self.assertEqual(len(test_game_store.games_dict), 1)
     test_game_store.abortGame("test_game_id_1")
-    self.assertEquals(len(test_game_store.games_dict), 1)
-    self.assertEquals(test_game_store.getGame("test_game_id_1"), test_game)
-    self.assertEquals(test_game_store.getGame("test_game_id_2"), None)
+    self.assertEqual(len(test_game_store.games_dict), 1)
+    self.assertEqual(test_game_store.getGame("test_game_id_1"), test_game)
+    self.assertEqual(test_game_store.getGame("test_game_id_2"), None)
   
   def testCreateGame(self):
     number_of_players = random.randint(1,1000)
@@ -1291,27 +1291,27 @@ class TestViricideGameStore(ExtendedTestCase):
     self.mocker.result(thread_instantiation)
     self.mocker.replay()
     test_game_store = ViricideGameStore(timeout_thread_class=thread_class.init)
-    self.assertEquals(test_game_store.getGame("test_game_id"), None)
-    self.assertEquals(len(test_game_store.games_dict), 0)
+    self.assertEqual(test_game_store.getGame("test_game_id"), None)
+    self.assertEqual(len(test_game_store.games_dict), 0)
     test_game = test_game_store.createGame("test_game_id", number_of_players)
-    self.assertEquals(len(test_game_store.games_dict), 1)
-    self.assertEquals(test_game_store.getGame("test_game_id"), test_game)
-    self.assertEquals(test_game.starting_amount_of_players, number_of_players)
+    self.assertEqual(len(test_game_store.games_dict), 1)
+    self.assertEqual(test_game_store.getGame("test_game_id"), test_game)
+    self.assertEqual(test_game.starting_amount_of_players, number_of_players)
     self.assertRaises(WrongNumberOfPlayers, test_game_store.createGame,
         "test_game_id", number_of_players + 1)
-    self.assertEquals(len(test_game_store.games_dict), 1)
-    self.assertEquals(test_game, test_game_store.createGame("test_game_id",
+    self.assertEqual(len(test_game_store.games_dict), 1)
+    self.assertEqual(test_game, test_game_store.createGame("test_game_id",
         number_of_players))
-    self.assertEquals(len(test_game_store.games_dict), 1)
+    self.assertEqual(len(test_game_store.games_dict), 1)
 
   def testRemoveGameFromGameStore(self):
     test_game_store = ViricideGameStore()
     test_game_store.games_dict["test1"] = "nonce"
-    self.assertEquals(len(test_game_store.games_dict), 1)
+    self.assertEqual(len(test_game_store.games_dict), 1)
     test_game_store.removeGameFromGameStore("test2")
-    self.assertEquals(len(test_game_store.games_dict), 1)
+    self.assertEqual(len(test_game_store.games_dict), 1)
     test_game_store.removeGameFromGameStore("test1")
-    self.assertEquals(len(test_game_store.games_dict), 0)
+    self.assertEqual(len(test_game_store.games_dict), 0)
 
   
 class TestViricideGameStartTimeoutThread(ExtendedTestCase):
@@ -1322,7 +1322,7 @@ class TestViricideGameStartTimeoutThread(ExtendedTestCase):
   
   def tearDown(self):
     FLAGS.game_start_timeout = self.old_game_start_timeout
-    self.assertNotEquals(FLAGS.game_start_timeout, "nonce")
+    self.assertNotEqual(FLAGS.game_start_timeout, "nonce")
     ExtendedTestCase.tearDown(self)
 
   def testInit1(self):
@@ -1330,24 +1330,24 @@ class TestViricideGameStartTimeoutThread(ExtendedTestCase):
     self.mocker.replay()
     FLAGS.game_start_timeout = "nonce"
     thread = ViricideGameStartTimeoutThread(game_store, "game_id")
-    self.assertEquals(thread.game_store, game_store)
-    self.assertEquals(thread.game_id, "game_id")
-    self.assertEquals(thread.last_player_count, -1)
-    self.assertEquals(thread.termination_countdown, "nonce")
-    self.assertEquals(thread.game_start_timeout, "nonce")
-    self.assert_(thread.isDaemon())
+    self.assertEqual(thread.game_store, game_store)
+    self.assertEqual(thread.game_id, "game_id")
+    self.assertEqual(thread.last_player_count, -1)
+    self.assertEqual(thread.termination_countdown, "nonce")
+    self.assertEqual(thread.game_start_timeout, "nonce")
+    self.assertTrue(thread.isDaemon())
 
   def testInit2(self):
     game_store = self.mocker.mock(ViricideGameStore)
     self.mocker.replay()
     thread = ViricideGameStartTimeoutThread(game_store, "game_id",
         game_start_timeout="nonce2")
-    self.assertEquals(thread.game_store, game_store)
-    self.assertEquals(thread.game_id, "game_id")
-    self.assertEquals(thread.last_player_count, -1)
-    self.assertEquals(thread.termination_countdown, "nonce2")
-    self.assertEquals(thread.game_start_timeout, "nonce2")
-    self.assert_(thread.isDaemon())
+    self.assertEqual(thread.game_store, game_store)
+    self.assertEqual(thread.game_id, "game_id")
+    self.assertEqual(thread.last_player_count, -1)
+    self.assertEqual(thread.termination_countdown, "nonce2")
+    self.assertEqual(thread.game_start_timeout, "nonce2")
+    self.assertTrue(thread.isDaemon())
   
   def testRun1(self):
     game_store = self.mocker.mock(ViricideGameStore)
@@ -1357,7 +1357,7 @@ class TestViricideGameStartTimeoutThread(ExtendedTestCase):
     thread = ViricideGameStartTimeoutThread(game_store, "game_id",
         game_start_timeout=20)
     thread.run()
-    self.assertEquals(thread.termination_countdown, 20)
+    self.assertEqual(thread.termination_countdown, 20)
 
   def testRun2(self):
     game = self.mocker.mock(ViricideGame)
@@ -1370,11 +1370,11 @@ class TestViricideGameStartTimeoutThread(ExtendedTestCase):
     thread = ViricideGameStartTimeoutThread(game_store, "game_id",
         game_start_timeout=20)
     thread.run()
-    self.assertEquals(thread.termination_countdown, 20)
+    self.assertEqual(thread.termination_countdown, 20)
   
   def testRun3a(self):
     if FLAGS.ignore_time_based_tests:
-      print "ignoring testRun3a"
+      print("ignoring testRun3a")
       return
     game = self.mocker.mock(ViricideGame)
     game.started
@@ -1400,13 +1400,13 @@ class TestViricideGameStartTimeoutThread(ExtendedTestCase):
     thread.run()
     x = time.time() - x
     self.assertApproximates(x, 1.0, .01)
-    self.assertEquals(thread.termination_countdown, 20)
-    self.assertEquals(thread.last_player_count, 0)
-    self.assertEquals(thread.max_player_count, 0)
+    self.assertEqual(thread.termination_countdown, 20)
+    self.assertEqual(thread.last_player_count, 0)
+    self.assertEqual(thread.max_player_count, 0)
   
   def testRun3b(self):
     if FLAGS.ignore_time_based_tests:
-      print "ignoring testRun3b"
+      print("ignoring testRun3b")
       return
     game = self.mocker.mock(ViricideGame)
     game.started
@@ -1431,9 +1431,9 @@ class TestViricideGameStartTimeoutThread(ExtendedTestCase):
     thread.run()
     x = time.time() - x
     self.assertApproximates(x, 1.0, .01)
-    self.assertEquals(thread.termination_countdown, 30)
-    self.assertEquals(thread.last_player_count, 0)
-    self.assertEquals(thread.max_player_count, 0)
+    self.assertEqual(thread.termination_countdown, 30)
+    self.assertEqual(thread.last_player_count, 0)
+    self.assertEqual(thread.max_player_count, 0)
   
   def testRun4a(self):
     game = self.mocker.mock(ViricideGame)
@@ -1453,12 +1453,12 @@ class TestViricideGameStartTimeoutThread(ExtendedTestCase):
     thread.last_player_count = 3
     thread.termination_countdown = 10
     thread.run()
-    self.assertEquals(thread.termination_countdown, 0)
-    self.assertEquals(thread.last_player_count, 4)
+    self.assertEqual(thread.termination_countdown, 0)
+    self.assertEqual(thread.last_player_count, 4)
   
   def testRun4b(self):
     if FLAGS.ignore_time_based_tests:
-      print "ignoring testRun4b"
+      print("ignoring testRun4b")
       return
     game = self.mocker.mock(ViricideGame)
     game_store = self.mocker.mock(ViricideGameStore)
@@ -1480,12 +1480,12 @@ class TestViricideGameStartTimeoutThread(ExtendedTestCase):
     thread.last_player_count = 3
     thread.termination_countdown = 10
     thread.run()
-    self.assertEquals(thread.termination_countdown, 29)
-    self.assertEquals(thread.last_player_count, 4)
+    self.assertEqual(thread.termination_countdown, 29)
+    self.assertEqual(thread.last_player_count, 4)
 
   def testRun5(self):
     if FLAGS.ignore_time_based_tests:
-      print "ignoring testRun5"
+      print("ignoring testRun5")
       return
     game = self.mocker.mock(ViricideGame)
     game.started
@@ -1523,13 +1523,13 @@ class TestViricideGameStartTimeoutThread(ExtendedTestCase):
     thread.run()
     x = time.time() - x
     self.assertApproximates(x, 2.0, .01)
-    self.assertEquals(thread.termination_countdown, 21)
-    self.assertEquals(thread.last_player_count, 0)
-    self.assertEquals(thread.max_player_count, 1)
+    self.assertEqual(thread.termination_countdown, 21)
+    self.assertEqual(thread.last_player_count, 0)
+    self.assertEqual(thread.max_player_count, 1)
   
   def testRun6(self):
     if FLAGS.ignore_time_based_tests:
-      print "ignoring testRun6"
+      print("ignoring testRun6")
       return
     game = self.mocker.mock(ViricideGame)
     game.started
@@ -1562,9 +1562,9 @@ class TestViricideGameStartTimeoutThread(ExtendedTestCase):
     thread.run()
     x = time.time() - x
     self.assertApproximates(x, 2.0, .01)
-    self.assertEquals(thread.termination_countdown, 20)
-    self.assertEquals(thread.last_player_count, 1)
-    self.assertEquals(thread.max_player_count, 1)
+    self.assertEqual(thread.termination_countdown, 20)
+    self.assertEqual(thread.last_player_count, 1)
+    self.assertEqual(thread.max_player_count, 1)
 
 
 class OldStyleTestObject(): pass
@@ -1587,7 +1587,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     handler.errors = "nonce1"
     handler.responded = False
     handler.sendErrors()
-    self.assert_(handler.responded)
+    self.assertTrue(handler.responded)
   
   def testSendErrors2(self):
     socket = self.mocker.mock()
@@ -1673,7 +1673,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     self.mocker.result(other_player)
     other_player.sendObject({"message_type": "combos", "combos": cells.COLORS +
         cells.COLORS})
-    for i in xrange(len(cells.COLORS)-1):
+    for i in range(len(cells.COLORS)-1):
       game.activePlayerAfter(other_player)
       self.mocker.result(main_player)
       game.activePlayerAfter(main_player)
@@ -1700,13 +1700,13 @@ class TestViricideConnectionHandler(ExtendedTestCase):
       self.mocker.result(other_player)
       other_player.sendObject({"message_type": "combos", "combos": ["red",
           "blue"]})
-      for i in xrange(len(cells.COLORS)-1):
+      for i in range(len(cells.COLORS)-1):
         game.activePlayerAfter(other_player)
         self.mocker.result(main_player)
         game.activePlayerAfter(main_player)
         self.mocker.result(other_player)
     self.mocker.replay()
-    self.assertEquals(cells.COLORS, ["red", "green", "blue"])
+    self.assertEqual(cells.COLORS, ["red", "green", "blue"])
     handler = self.constructHandleFreeHandler(socket, ("localhost", 1234),
         server)
     handler.game = game
@@ -1737,7 +1737,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
       other_player.sendObject({"message_type": "combos", "combos": ["blue",
           "blue"]})
     self.mocker.replay()
-    self.assertEquals(cells.COLORS, ["red", "green", "blue"])
+    self.assertEqual(cells.COLORS, ["red", "green", "blue"])
     handler = self.constructHandleFreeHandler(socket, ("localhost", 1234),
         server)
     handler.game = game
@@ -1768,7 +1768,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
       game.activePlayerAfter(main_player)
       self.mocker.result(other_player)
     self.mocker.replay()
-    self.assertEquals(cells.COLORS, ["red", "green", "blue"])
+    self.assertEqual(cells.COLORS, ["red", "green", "blue"])
     handler = self.constructHandleFreeHandler(socket, ("localhost", 1234),
         server)
     handler.game = game
@@ -1777,7 +1777,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
 
   def testSendCombos8(self):
     player = []
-    for i in xrange(5):
+    for i in range(5):
       player.append(self.mocker.mock(ViricidePlayer))
     socket = self.mocker.mock()
     server = self.mocker.mock(ViricideServer)
@@ -1807,7 +1807,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     
   def testSendCombos9(self):
     player = []
-    for i in xrange(5):
+    for i in range(5):
       player.append(self.mocker.mock(ViricidePlayer))
     socket = self.mocker.mock()
     server = self.mocker.mock(ViricideServer)
@@ -1825,7 +1825,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     player[2].sendObject({"message_type": "combos", "combos": ["green"] +
         cells.COLORS})
     self.mocker.replay()
-    self.assertEquals(cells.COLORS, ["red", "green", "blue"])
+    self.assertEqual(cells.COLORS, ["red", "green", "blue"])
     handler = self.constructHandleFreeHandler(socket, ("localhost", 1234),
         server)
     handler.game = game
@@ -1834,7 +1834,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     
   def testSendCombos10(self):
     player = []
-    for i in xrange(5):
+    for i in range(5):
       player.append(self.mocker.mock(ViricidePlayer))
     socket = self.mocker.mock()
     server = self.mocker.mock(ViricideServer)
@@ -1854,7 +1854,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     player[3].sendObject({"message_type": "combos", "combos": ["blue", "green"]
         + cells.COLORS})
     self.mocker.replay()
-    self.assertEquals(cells.COLORS, ["red", "green", "blue"])
+    self.assertEqual(cells.COLORS, ["red", "green", "blue"])
     handler = self.constructHandleFreeHandler(socket, ("localhost", 1234),
         server)
     handler.game = game
@@ -1863,7 +1863,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     
   def testSendCombos11(self):
     player = []
-    for i in xrange(3):
+    for i in range(3):
       player.append(self.mocker.mock(ViricidePlayer))
     socket = self.mocker.mock()
     server = self.mocker.mock(ViricideServer)
@@ -1883,7 +1883,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     player[1].sendObject({"message_type": "combos", "combos": ["blue", "red"]
         + cells.COLORS})
     self.mocker.replay()
-    self.assertEquals(cells.COLORS, ["red", "green", "blue"])
+    self.assertEqual(cells.COLORS, ["red", "green", "blue"])
     handler = self.constructHandleFreeHandler(socket, ("localhost", 1234),
         server)
     handler.game = game
@@ -1892,7 +1892,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     
   def testSendCombos12(self):
     player = []
-    for i in xrange(3):
+    for i in range(3):
       player.append(self.mocker.mock(ViricidePlayer))
     socket = self.mocker.mock()
     server = self.mocker.mock(ViricideServer)
@@ -1911,7 +1911,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     self.mocker.result(player[1])
     player[1].sendObject({"message_type": "combos", "combos": ["red", "green"]})
     self.mocker.replay()
-    self.assertEquals(cells.COLORS, ["red", "green", "blue"])
+    self.assertEqual(cells.COLORS, ["red", "green", "blue"])
     handler = self.constructHandleFreeHandler(socket, ("localhost", 1234),
         server)
     handler.game = game
@@ -1920,7 +1920,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     
   def testSendCombos13(self):
     player = []
-    for i in xrange(3):
+    for i in range(3):
       player.append(self.mocker.mock(ViricidePlayer))
     socket = self.mocker.mock()
     server = self.mocker.mock(ViricideServer)
@@ -1940,7 +1940,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     player[1].sendObject({"message_type": "combos", "combos": ["blue", "blue",
         "green"]})
     self.mocker.replay()
-    self.assertEquals(cells.COLORS, ["red", "green", "blue"])
+    self.assertEqual(cells.COLORS, ["red", "green", "blue"])
     handler = self.constructHandleFreeHandler(socket, ("localhost", 1234),
         server)
     handler.game = game
@@ -1949,7 +1949,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     
   def testSendCombos13(self):
     player = []
-    for i in xrange(3):
+    for i in range(3):
       player.append(self.mocker.mock(ViricidePlayer))
     socket = self.mocker.mock()
     server = self.mocker.mock(ViricideServer)
@@ -1969,7 +1969,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     player[2].sendObject({"message_type": "combos", "combos": ["green", "green",
         "blue"]})
     self.mocker.replay()
-    self.assertEquals(cells.COLORS, ["red", "green", "blue"])
+    self.assertEqual(cells.COLORS, ["red", "green", "blue"])
     handler = self.constructHandleFreeHandler(socket, ("localhost", 1234),
         server)
     handler.game = game
@@ -2046,7 +2046,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     self.mocker.result(False)
     player.getObject()
     self.mocker.result(None)
-    for i in xrange(20):
+    for i in range(20):
       game.game_over
       self.mocker.result(False)
       player.getObject()
@@ -2294,8 +2294,8 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     handler.joinGame()
     self.assertListEquals(handler.errors, [])
     self.assertListEquals(self.all_args, [()])
-    self.assertEquals(handler.player, player)
-    self.assertEquals(handler.responded, True)
+    self.assertEqual(handler.player, player)
+    self.assertEqual(handler.responded, True)
   
   def testJoinGame6(self):
     with self.mocker.order():
@@ -2385,9 +2385,9 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     handler.handle = lambda: None
     ViricideConnectionHandler.__init__(handler, socket, ("localhost",
         123), server)
-    self.assertEquals(type(handler.request), network.FancySocket)
-    self.assertEquals(handler.request.sock, socket)
-    self.assertEquals(handler.server, server)
+    self.assertEqual(type(handler.request), network.FancySocket)
+    self.assertEqual(handler.request.sock, socket)
+    self.assertEqual(handler.server, server)
 
   def testHandle1(self):
     socket = self.mocker.mock(network.FancySocket)
@@ -2403,11 +2403,11 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     handler.sendErrors = self.addArgsIfCalled
     SocketServer.BaseRequestHandler.__init__(handler, socket, ("localhost",
         123), server)
-    self.assertEquals(handler.request, socket)
+    self.assertEqual(handler.request, socket)
     self.assertListEquals(handler.errors, ["Incoming data must be a "
         "dictionary"])
     self.assertListEquals(self.all_args, [()])
-    self.assertEquals(handler.responded, False)
+    self.assertEqual(handler.responded, False)
 
   def testHandle2(self):
     socket = self.mocker.mock(network.FancySocket)
@@ -2423,7 +2423,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     handler.sendErrors = self.addArgsIfCalled
     SocketServer.BaseRequestHandler.__init__(handler, socket, ("localhost",
         123), server)
-    self.assertEquals(handler.request, socket)
+    self.assertEqual(handler.request, socket)
     self.assertListEquals(ViricideConnectionHandler.REQUIRED_INIT_FIELDS,
         ['protocol_version', 'game_id', 'starting_amount_of_players', 'rows',
         'cols', 'virus_number', 'combo_length', 'client_id'])
@@ -2434,7 +2434,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
         'Missing field: combo_length.', 'Missing field: client_id.',
         'Missing protocol version!'])
     self.assertListEquals(self.all_args, [()])
-    self.assertEquals(handler.responded, False)
+    self.assertEqual(handler.responded, False)
     
   def testHandle3(self):
     socket = self.mocker.mock(network.FancySocket)
@@ -2453,7 +2453,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     handler.sendErrors = self.addArgsIfCalled
     SocketServer.BaseRequestHandler.__init__(handler, socket, ("localhost",
         123), server)
-    self.assertEquals(handler.request, socket)
+    self.assertEqual(handler.request, socket)
     self.assertListEquals(ViricideConnectionHandler.REQUIRED_INIT_INT_FIELDS,
         ['starting_amount_of_players', 'rows', 'cols', 'virus_number',
         'combo_length'])
@@ -2463,7 +2463,7 @@ class TestViricideConnectionHandler(ExtendedTestCase):
         'integer.', 'Field combo_length must be an integer.', 'Wrong protocol '
         'version!'])
     self.assertListEquals(self.all_args, [()])
-    self.assertEquals(handler.responded, False)
+    self.assertEqual(handler.responded, False)
     
   def testHandle4(self):
     socket = self.mocker.mock(network.FancySocket)
@@ -2483,12 +2483,12 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     handler.joinGame = self.addArgsIfCalled
     SocketServer.BaseRequestHandler.__init__(handler, socket, ("localhost",
         123), server)
-    self.assertEquals(handler.request, socket)
+    self.assertEqual(handler.request, socket)
     self.assertListEquals(handler.errors, [])
     self.assertListEquals(self.all_args, [()])
-    self.assertEquals(handler.responded, False)
+    self.assertEqual(handler.responded, False)
     for key in result_dict:
-      self.assertEquals(getattr(handler, key), result_dict[key])
+      self.assertEqual(getattr(handler, key), result_dict[key])
     
   def testHandle5(self):
     socket = self.mocker.mock(network.FancySocket)
@@ -2510,12 +2510,12 @@ class TestViricideConnectionHandler(ExtendedTestCase):
     handler.player = player
     SocketServer.BaseRequestHandler.__init__(handler, socket, ("localhost",
         123), server)
-    self.assertEquals(handler.request, socket)
+    self.assertEqual(handler.request, socket)
     self.assertListEquals(handler.errors, [])
     self.assertListEquals(self.all_args, [()])
-    self.assertEquals(handler.responded, False)
+    self.assertEqual(handler.responded, False)
     for key in result_dict:
-      self.assertEquals(getattr(handler, key), result_dict[key])
+      self.assertEqual(getattr(handler, key), result_dict[key])
     
 
 for field in ViricideConnectionHandler.REQUIRED_INIT_FIELDS:
@@ -2538,7 +2538,7 @@ for field in ViricideConnectionHandler.REQUIRED_INIT_FIELDS:
     handler.sendErrors = self.addArgsIfCalled
     SocketServer.BaseRequestHandler.__init__(handler, socket, ("localhost",
         123), server)
-    self.assertEquals(handler.request, socket)
+    self.assertEqual(handler.request, socket)
     if field != "protocol_version":
       self.assertListEquals(handler.errors, ["Must have 8 fields.",
           "Missing field: %s." % field])
@@ -2546,7 +2546,7 @@ for field in ViricideConnectionHandler.REQUIRED_INIT_FIELDS:
       self.assertListEquals(handler.errors, ["Must have 8 fields.",
           "Missing field: protocol_version.", "Missing protocol version!"])
     self.assertListEquals(self.all_args, [()])
-    self.assertEquals(handler.responded, False)
+    self.assertEqual(handler.responded, False)
   setattr(TestViricideConnectionHandler, "testHandle_missing_field_%s" % field,
       testHandleMissingField)
 
@@ -2570,11 +2570,11 @@ for field in ViricideConnectionHandler.REQUIRED_INIT_INT_FIELDS:
     handler.sendErrors = self.addArgsIfCalled
     SocketServer.BaseRequestHandler.__init__(handler, socket, ("localhost",
         123), server)
-    self.assertEquals(handler.request, socket)
+    self.assertEqual(handler.request, socket)
     self.assertListEquals(handler.errors, ["Field %s must be an integer." %
         field])
     self.assertListEquals(self.all_args, [()])
-    self.assertEquals(handler.responded, False)
+    self.assertEqual(handler.responded, False)
   setattr(TestViricideConnectionHandler, "testHandle_nonint_field_%s" % field,
       testHandleNonIntField)
 
@@ -2594,12 +2594,12 @@ class TestViricideServer(ExtendedTestCase):
     server = ViricideServer(address=("localhost", 12345),
         max_connections="nonce2", limit_total_connections="nonce3",
         game_store="nonce4")
-    self.assertEquals(server.address, ("localhost", 12345))
-    self.assertEquals(server.max_connections, "nonce2")
-    self.assertEquals(server.limit_total_connections, "nonce3")
-    self.assertEquals(server.game_store, "nonce4")
-    self.assertEquals(server.daemon_threads, False)
-    self.assertEquals(server.allow_reuse_address, True)
+    self.assertEqual(server.address, ("localhost", 12345))
+    self.assertEqual(server.max_connections, "nonce2")
+    self.assertEqual(server.limit_total_connections, "nonce3")
+    self.assertEqual(server.game_store, "nonce4")
+    self.assertEqual(server.daemon_threads, False)
+    self.assertEqual(server.allow_reuse_address, True)
     
   def testInit2(self):
     FLAGS.port = "nonce1"
@@ -2608,36 +2608,36 @@ class TestViricideServer(ExtendedTestCase):
     server = ViricideServer(address=("localhost", 12345),
         max_connections="nonce2", limit_total_connections=False,
         game_store="nonce4")
-    self.assertEquals(server.address, ("localhost", 12345))
-    self.assertEquals(server.max_connections, "nonce2")
-    self.assertEquals(server.limit_total_connections, False)
-    self.assertEquals(server.game_store, "nonce4")
-    self.assertEquals(server.daemon_threads, True)
-    self.assertEquals(server.allow_reuse_address, True)
+    self.assertEqual(server.address, ("localhost", 12345))
+    self.assertEqual(server.max_connections, "nonce2")
+    self.assertEqual(server.limit_total_connections, False)
+    self.assertEqual(server.game_store, "nonce4")
+    self.assertEqual(server.daemon_threads, True)
+    self.assertEqual(server.allow_reuse_address, True)
     
   def testInit3(self):
     FLAGS.port = 55535
     FLAGS.max_connections = "nonce5"
     FLAGS.limit_total_connections = "nonce6"
     server = ViricideServer()
-    self.assertEquals(server.address, ("", 55535))
-    self.assertEquals(server.max_connections, "nonce5")
-    self.assertEquals(server.limit_total_connections, "nonce6")
-    self.assertEquals(type(server.game_store), ViricideGameStore)
-    self.assertEquals(server.daemon_threads, False)
-    self.assertEquals(server.allow_reuse_address, True)
+    self.assertEqual(server.address, ("", 55535))
+    self.assertEqual(server.max_connections, "nonce5")
+    self.assertEqual(server.limit_total_connections, "nonce6")
+    self.assertEqual(type(server.game_store), ViricideGameStore)
+    self.assertEqual(server.daemon_threads, False)
+    self.assertEqual(server.allow_reuse_address, True)
     
   def testInit4(self):
     FLAGS.port = 55535
     FLAGS.max_connections = "nonce5"
     FLAGS.limit_total_connections = False
     server = ViricideServer()
-    self.assertEquals(server.address, ("", 55535))
-    self.assertEquals(server.max_connections, "nonce5")
-    self.assertEquals(server.limit_total_connections, False)
-    self.assertEquals(type(server.game_store), ViricideGameStore)
-    self.assertEquals(server.daemon_threads, True)
-    self.assertEquals(server.allow_reuse_address, True)
+    self.assertEqual(server.address, ("", 55535))
+    self.assertEqual(server.max_connections, "nonce5")
+    self.assertEqual(server.limit_total_connections, False)
+    self.assertEqual(type(server.game_store), ViricideGameStore)
+    self.assertEqual(server.daemon_threads, True)
+    self.assertEqual(server.allow_reuse_address, True)
   
   def testRun1(self):
     server = ViricideServer()
